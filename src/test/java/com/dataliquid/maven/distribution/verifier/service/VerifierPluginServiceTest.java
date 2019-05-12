@@ -20,11 +20,11 @@ import static org.xmlunit.matchers.CompareMatcher.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.dataliquid.maven.distribution.verifier.service.VerifierService;
 
 public class VerifierPluginServiceTest
 {
@@ -32,10 +32,13 @@ public class VerifierPluginServiceTest
 
     private File outputDirectory;
 
+    private Map<String, String> variables;
+
     @Before
     public void setUp() throws IOException
     {
         verifierService = new VerifierService();
+        variables = new HashMap<>();
         outputDirectory = new File("target/");
     }
 
@@ -49,7 +52,27 @@ public class VerifierPluginServiceTest
         File distributionArchive = new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, report);
+        verifierService.verify(distributionArchive, outputDirectory, whitelist, report, variables);
+
+        // then
+        assertThat(new File(expectedReport), isSimilarTo(new File(report)).ignoreWhitespace().ignoreComments());
+
+    }
+    
+    @Test
+    public void shouldVerifyWithVariables() throws Exception
+    {
+        // given
+        File whitelist = new File("src/test/resources/valid-fullmatch-variables/whitelist.xml");
+        String expectedReport = "src/test/resources/valid-fullmatch-variables/report.xml";
+        String report = "target/valid-fullmatch-variables-report.xml";
+        File distributionArchive = new File("src/test/resources/valid-fullmatch-variables/valid_fullmatch_variables.zip");
+        
+        variables.put("project.artifactId", "myartifact");
+        variables.put("project.version", "1.0.0");
+
+        // when
+        verifierService.verify(distributionArchive, outputDirectory, whitelist, report, variables);
 
         // then
         assertThat(new File(expectedReport), isSimilarTo(new File(report)).ignoreWhitespace().ignoreComments());
@@ -66,7 +89,7 @@ public class VerifierPluginServiceTest
         File distributionArchive = new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, report);
+        verifierService.verify(distributionArchive, outputDirectory, whitelist, report, variables);
 
         // then
         assertThat(new File(expectedReport), isSimilarTo(new File(report)).ignoreWhitespace().ignoreComments());
@@ -83,7 +106,7 @@ public class VerifierPluginServiceTest
         File distributionArchive = new File("src/test/resources/invalid-found-undefined-file/invalid_found_undefined_file.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, report);
+        verifierService.verify(distributionArchive, outputDirectory, whitelist, report, variables);
 
         // then
         assertThat(new File(expectedReport), isSimilarTo(new File(report)).ignoreWhitespace().ignoreComments());
@@ -100,7 +123,7 @@ public class VerifierPluginServiceTest
         File distributionArchive = new File("src/test/resources/invalid-different-md5-checksum/invalid_different_md5_checksum.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, report);
+        verifierService.verify(distributionArchive, outputDirectory, whitelist, report, variables);
 
         // then
         assertThat(new File(expectedReport), isSimilarTo(new File(report)).ignoreWhitespace().ignoreComments());

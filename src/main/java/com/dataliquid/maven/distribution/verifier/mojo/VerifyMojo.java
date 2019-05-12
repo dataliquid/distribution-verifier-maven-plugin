@@ -16,6 +16,8 @@
 package com.dataliquid.maven.distribution.verifier.mojo;
 
 import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /*
  * Copyright 2001-2005 The Apache Software Foundation.
@@ -63,11 +65,27 @@ public class VerifyMojo extends AbstractMojo
     @Parameter(property = "report", defaultValue = "${project.build.directory}/report.xml")
     private String reportFile;
 
+    /**
+     * Variables which can be used in whitelist path attribute.
+     * 
+     * <pre>
+     * <configuration>
+     *   <environments>
+     *      <my.prop1>value</my.prop1>
+     *      <my.prop2>${project.version}-myvalue.jar</my.prop2>
+     *    </environments>
+     * </configuration>
+     * </pre>
+     */
+    @Parameter(property = "properties")
+    private Map<String, String> properties;
+
     public void execute() throws MojoExecutionException
     {
-        getLog().info("Verifying the distribution archive file [ " + distributionArchiveFile + " ] ...");
+        initialize();
+        getLog().info("Verifying the distribution archive file " + distributionArchiveFile);
         VerifierService verifierPluginService = new VerifierService();
-        boolean match = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, reportFile);
+        boolean match = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, reportFile, properties);
         if (match)
         {
             getLog().info("Verification finished successfully.");
@@ -75,6 +93,17 @@ public class VerifyMojo extends AbstractMojo
         else
         {
             throw new MojoExecutionException("Verification failed! Report file generated: " + reportFile);
+        }
+    }
+
+    private void initialize()
+    {
+        if (properties == null || properties.isEmpty())
+        {
+            properties = new LinkedHashMap<>();
+            properties.put("project.groupId", project.getGroupId());
+            properties.put("project.artifactId", project.getArtifactId());
+            properties.put("project.version", project.getVersion());
         }
     }
 

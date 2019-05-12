@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -45,7 +48,8 @@ public class VerifierService
     private static final String EMPTY = "";
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public boolean verify(File distributionArchiveFile, File workDirectory, File whitelist, String reportFile)
+    public boolean verify(File distributionArchiveFile, File workDirectory, File whitelist, String reportFile,
+            Map<String, String> properties)
     {
 
         Boolean verificationStatus = null;
@@ -70,7 +74,7 @@ public class VerifierService
             logger.info("File unzipped successfully");
 
             logger.info("Loading whitelist " + whitelist);
-            List<Entry> entries = loadWhitelist(whitelist);
+            List<Entry> entries = loadWhitelist(whitelist, properties);
             logger.info("Whitelist file loaded successfully - Entries: " + entries.size());
 
             logger.info("Verifying whitelist files against distribution archive");
@@ -82,6 +86,7 @@ public class VerifierService
         }
         catch (Exception e)
         {
+            e.printStackTrace();
             logger.error("Error occurred : {}", e.getMessage(), e);
             verificationStatus = false;
         }
@@ -210,7 +215,7 @@ public class VerifierService
 
     }
 
-    public List<Entry> loadWhitelist(File whitelist) throws Exception
+    public List<Entry> loadWhitelist(File whitelist, Map<String, String> properties) throws Exception
     {
         SAXReader reader = new SAXReader();
         Document document = reader.read(whitelist);
@@ -226,12 +231,47 @@ public class VerifierService
                 Entry entry = new Entry();
                 entry.setPath(element.attributeValue("path"));
                 entry.setMd5(element.attributeValue("md5"));
+                evaluate(entry, properties);
                 entries.add(entry);
                 logger.debug("<entry path=\"" + entry.getPath() + "\" md5=\"" + entry.getMd5() + "\"");
             }
         }
 
         return entries;
+    }
+
+    private void evaluate(Entry entry, Map<String, String> properties)
+    {
+        String path = evaluateString(entry.getPath(), properties);
+        entry.setPath(path);
+    }
+
+    /**
+     * Evaluate variable within given string value
+     * 
+     * @param value
+     *            lorem ${var} elit
+     * @param variables
+     *            Map<String, String> vars; vars.put("var", "ipsum");
+     * @return
+     */
+    private String evaluateString(String value, Map<String, String> variables)
+    {
+        final Matcher matcher = Pattern.compile("\\$\\{(.*?)\\}").matcher(value);
+        final StringBuffer buffer = new StringBuffer(value.length());
+        while (matcher.find())
+        {
+            if (variables.containsKey(matcher.group(1)))
+            {
+                matcher.appendReplacement(buffer, variables.get(matcher.group(1)));
+            }
+            else
+            {
+                logger.warn("Variable '" + matcher.group(1) +  "' is defined but could not resolved by the given variables.");
+            }
+        }
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     private String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException
