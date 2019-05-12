@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dataliquid.maven.verifier.domain;
+package com.dataliquid.maven.distribution.verifier.domain;
 
 public enum VerificationStatus
 {

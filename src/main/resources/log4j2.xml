@@ -27,8 +27,7 @@
 
 		<AsyncLogger name="org.springframework.beans.factory" level="WARN" />
 		
-		<AsyncLogger name="com.dataliquid.maven.verifier" level="INFO" />
-
+		<AsyncLogger name="com.dataliquid.maven.distribution.verifier" level="INFO" />
 
 		<AsyncRoot level="INFO">
 			<AppenderRef ref="Console" />

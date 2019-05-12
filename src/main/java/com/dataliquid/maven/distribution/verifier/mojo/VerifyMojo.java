@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dataliquid.maven.verifier.mojo;
+package com.dataliquid.maven.distribution.verifier.mojo;
 
 import java.io.File;
 
@@ -40,7 +40,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import com.dataliquid.maven.verifier.service.VerifierService;
+import com.dataliquid.maven.distribution.verifier.service.VerifierService;
 
 /**
  * Goal to verify the distribution archive file.

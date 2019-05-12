@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.dataliquid.maven.verifier.service;
+package com.dataliquid.maven.distribution.verifier.service;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.zeroturnaround.zip.ZipUtil;
 
-import com.dataliquid.maven.verifier.domain.Entry;
-import com.dataliquid.maven.verifier.domain.VerificationStatus;
+import com.dataliquid.maven.distribution.verifier.domain.Entry;
+import com.dataliquid.maven.distribution.verifier.domain.VerificationStatus;
 
 public class VerifierService
 {
