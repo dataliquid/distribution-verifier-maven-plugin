@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<report>
+	<entry md5="4114b3e750902c5404ffe4864b3e11b8" path="/Sample.md">
+		<result message="Validation passed successfully" status="SUCCESS" />
+	</entry>
+	<entry md5="193fa5e788a1800a760d1108051c2363" path="/Sample.txt">
+		<result message="Validation passed successfully" status="SUCCESS" />
+	</entry>
+	<entry md5="193fa5e788a1800a760d1108051c7778" path="/Sample.adoc">
+		<result message="Defined file not found" status="FAILED" />
+	</entry>
+</report>
