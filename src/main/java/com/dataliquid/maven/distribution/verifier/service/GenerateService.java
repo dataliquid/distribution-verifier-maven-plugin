@@ -63,7 +63,7 @@ public class GenerateService
 
             logger.info("Generate whitelist template from distribution archive");
 
-            generateWhistlist(destinationDirectory, destinationDirectory, whitelist);
+            generateWhitelist(destinationDirectory, destinationDirectory, whitelist);
 
             logger.info("Whitelist template has been generated. " + whitelist);
 
@@ -76,11 +76,11 @@ public class GenerateService
 
     }
 
-    private boolean generateWhistlist(File directory, File originalDirectory, File whistlist) throws Exception
+    private boolean generateWhitelist(File directory, File originalDirectory, File whistlist) throws Exception
     {
 
         Document document = DocumentHelper.createDocument();
-        Element whistlistElement = document.addElement("whistlist");
+        Element whistlistElement = document.addElement("whitelist");
 
         generateWhistliste(directory, originalDirectory, whistlistElement);
 
