@@ -28,7 +28,7 @@ import com.dataliquid.maven.distribution.verifier.service.GenerateService;
 /**
  * Goal to generate whitelist template from the distribution archive file.
  */
-@Mojo(name = "generate")
+@Mojo(name = "generate", requiresProject = false)
 public class GenerateMojo extends AbstractMojo
 {
     @Parameter(defaultValue = "${project}", required = true)
