@@ -156,7 +156,11 @@ public class VerifierService
 
         }
 
-        verifyAllFilesInWhitelist(directory, entries, originalDirectory, report);
+        boolean verifyAllFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory, report);
+        if (!verifyAllFilesInWhitelist)
+        {
+            verificationStatus = false;
+        }
 
         try (FileWriter writer = new FileWriter(reportFile))
         {
@@ -172,25 +176,35 @@ public class VerifierService
         return verificationStatus;
     }
 
-    public void verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, Element report)
+    public boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, Element report)
             throws Exception
+    {
+        Integer unexpectedFileCounter = 0;
+
+        verifyAllFilesInWhitelist(directory, whitelistEntries, originalDirectory, report, unexpectedFileCounter);
+
+        return (unexpectedFileCounter == 0);
+    }
+
+    private void verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, Element report,
+            Integer unexpectedFileCounter) throws Exception
     {
         File[] directoryEntries = directory.listFiles();
         for (File directoryEntry : directoryEntries)
         {
             if (directoryEntry.isDirectory())
             {
-                verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, report);
+                verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, report, unexpectedFileCounter);
             }
             else
             {
-                verifyFileInWhitelist(directoryEntry, whitelistEntries, originalDirectory, report);
+                verifyFileInWhitelist(directoryEntry, whitelistEntries, originalDirectory, report, unexpectedFileCounter);
             }
         }
     }
 
-    private void verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, Element report)
-            throws DOMException, NoSuchAlgorithmException, IOException
+    private void verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, Element report,
+            Integer unexpectedFileCounter) throws DOMException, NoSuchAlgorithmException, IOException
     {
         boolean exists = false;
         String strippedDirectory = FilenameUtils.normalize(subDirectory.getPath().replace(originalDirectory.getPath(), EMPTY), true);
@@ -211,8 +225,9 @@ public class VerifierService
             Element result = reportEntry.addElement("result");
             result.addAttribute("status", VerificationStatus.FAILED.name());
             result.addAttribute("message", "File is not defined in whitelist");
-        }
 
+            unexpectedFileCounter++;
+        }
     }
 
     public List<Entry> loadWhitelist(File whitelist, Map<String, String> properties) throws Exception
@@ -267,7 +282,7 @@ public class VerifierService
             }
             else
             {
-                logger.warn("Variable '" + matcher.group(1) +  "' is defined but could not resolved by the given variables.");
+                logger.warn("Variable '" + matcher.group(1) + "' is defined but could not resolved by the given variables.");
             }
         }
         matcher.appendTail(buffer);
