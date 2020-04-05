@@ -2,7 +2,7 @@
 
 The *Maven Distribution Verifier Plugin* allows verification of `*.jar*`, `*.war*`, `*.ear*` and `*.zip*` files. The content is checked against a defined whistelist. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
 
-If there are any discrepancies in the defined hash values or files that are not defined during the verification process, a report is generated.
+If there are any discrepancies in the defined hash values or files that are not defined during the verification process, a report is generated. In this way, the *software artifact* is *additionally hardened* in the *quality assurance* process.
 
 == Whitelist
 
