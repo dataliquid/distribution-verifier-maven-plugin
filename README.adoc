@@ -1,20 +1,16 @@
 == Intro
 
-The Maven Distribution Verifier plugin allows verification of jar, war, ear, and all zip files. 
-
-The content is checked against a defined whistelist.xml. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
+The Maven Distribution Verifier plugin allows verification of `*.jar`, `*.war`, `*.ear` and `*.zip` files. The content is checked against a defined whistelist.xml. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
 
 If there are any discrepancies in the defined hash values or files that are not defined during the verification process, a report is generated.
-
 
 == Whitelist
 
 The whitelist file `whitelist.xml` contains file name, path and the MD5 fingerprint.
 
-
-.Table Title
 |===
-|Attribut |Name of Column 2
+|Attribut 
+|Description
 
 |path
 |File path within the Zip file
@@ -46,27 +42,26 @@ The status can have the following values:
 [source,xml]
 ----
 <report>
-	<entry md5="4114b3e750902c5404ffe4864b3e11b8" path="/Sample.md">
-		<result message="Validation passed successfully" status="SUCCESS" />
-	</entry>
-	<entry md5="193fa5e788a1800a760d1108051c4711" path="/Sample.txt">
-		<result message="File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363" status="FAILED" />
-	</entry>
-	<entry md5="193fa5e788a1800a760d1108051c7778" path="/Sample.adoc">
-		<result message="Defined file not found" status="FAILED" />
-	</entry>
-	<entry md5="0430eba9643b5e60e49c055eb16cbf7a" path="/Sample.adoc">
-		<result status="FAILED" message="File is not defined in whitelist" />
-	</entry>
+ <entry md5="4114b3e750902c5404ffe4864b3e11b8" path="/Sample.md">
+  <result message="Validation passed successfully" status="SUCCESS" />
+ </entry>
+ <entry md5="193fa5e788a1800a760d1108051c4711" path="/Sample.txt">
+  <result message="File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363"
+          status="FAILED" />
+ </entry>
+ <entry md5="193fa5e788a1800a760d1108051c7778" path="/Sample.adoc">
+  <result message="Defined file not found" status="FAILED" />
+ </entry>
+ <entry md5="0430eba9643b5e60e49c055eb16cbf7a" path="/Sample.adoc">
+  <result status="FAILED" message="File is not defined in whitelist" />
+ </entry>
 </report>
 ----
 
 
 == Tools
 
-To create an initial whitelist, the commands `find` and `md5sum` can be combined on linux systems.
-
-To list all files with path and MD5 hash in the whitelist structure, use this command:
+Creating an initial whitelist, the commands `find` and `md5sum` can be combined on linux systems. List all files with path and MD5 hash in the whitelist structure, use this command:
 
 [source]
 ----
