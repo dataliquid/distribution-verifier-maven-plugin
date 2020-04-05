@@ -24,8 +24,8 @@ The whitelist file `whitelist.xml` contains file name, path and the MD5 fingerpr
 [source,xml]
 ----
 <whitelist>
-	<entry path="/Sample.md" />
-	<entry md5="193fa5e788a1800a760d1108051c2363" path="/Sample.txt" />	
+  <entry path="/Sample.md" />
+  <entry md5="193fa5e788a1800a760d1108051c2363" path="/Sample.txt" />	
 </whitelist>
 ----
 
