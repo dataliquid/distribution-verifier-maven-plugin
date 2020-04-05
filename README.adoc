@@ -1,6 +1,6 @@
 == Intro
 
-The Maven Distribution Verifier plugin allows verification of `*.jar`, `*.war`, `*.ear` and `*.zip` files. The content is checked against a defined whistelist.xml. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
+The *Maven Distribution Verifier Plugin* allows verification of `*.jar*`, `*.war*`, `*.ear*` and `*.zip*` files. The content is checked against a defined whistelist. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
 
 If there are any discrepancies in the defined hash values or files that are not defined during the verification process, a report is generated.
 
@@ -10,7 +10,7 @@ The whitelist file `whitelist.xml` contains file name, path and the MD5 fingerpr
 
 [%header,cols=2*] 
 |===
-|Attribut 
+|Attribute
 |Description
 
 |path
