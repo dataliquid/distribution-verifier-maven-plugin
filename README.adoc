@@ -8,6 +8,7 @@ If there are any discrepancies in the defined hash values or files that are not 
 
 The whitelist file `whitelist.xml` contains file name, path and the MD5 fingerprint.
 
+[%header,cols=2*] 
 |===
 |Attribut 
 |Description
@@ -43,17 +44,17 @@ The status can have the following values:
 ----
 <report>
  <entry md5="4114b3e750902c5404ffe4864b3e11b8" path="/Sample.md">
-  <result message="Validation passed successfully" status="SUCCESS" />
+    <result message="Validation passed successfully" status="SUCCESS" />
  </entry>
  <entry md5="193fa5e788a1800a760d1108051c4711" path="/Sample.txt">
-  <result message="File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363"
-          status="FAILED" />
+    <result message="File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363"
+            status="FAILED" />
  </entry>
  <entry md5="193fa5e788a1800a760d1108051c7778" path="/Sample.adoc">
-  <result message="Defined file not found" status="FAILED" />
+    <result message="Defined file not found" status="FAILED" />
  </entry>
  <entry md5="0430eba9643b5e60e49c055eb16cbf7a" path="/Sample.adoc">
-  <result status="FAILED" message="File is not defined in whitelist" />
+    <result status="FAILED" message="File is not defined in whitelist" />
  </entry>
 </report>
 ----
@@ -61,10 +62,11 @@ The status can have the following values:
 
 == Tools
 
-Creating an initial whitelist, the commands `find` and `md5sum` can be combined on linux systems. List all files with path and MD5 hash in the whitelist structure, use this command:
+Creating an initial whitelist, the commands `find` and `md5sum` can be combined on linux systems. Listing all files with path and MD5 hash in the whitelist structure, use this command:
 
 [source]
 ----
+cd path/to/your/directory
 find * -type f -exec md5sum {} \; | awk '{printf "<entry md5=\"%s\" path=\"/%s\" />%s", $1, $2, "\n"}'
 ----
 
