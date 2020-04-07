@@ -67,7 +67,7 @@ Creating an initial whitelist, the commands `find` and `md5sum` can be combined 
 [source]
 ----
 cd path/to/your/directory
-find * -type f -exec md5sum {} \; | awk '{printf "<entry md5=\"%s\" path=\"/%s\" />%s", $1, $2, "\n"}'
+find * -type f -exec md5sum {} \; | awk '{printf "<entry path=\"/%s\" md5=\"%s\" />%s", $2, $1, "\n"}'
 ----
 
 The `<entry>` elements are displayed on the console after the processing has been completed.
