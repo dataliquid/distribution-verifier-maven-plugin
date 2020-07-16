@@ -75,6 +75,6 @@ These can then be transferred to your own whitelist.
 
 [source,xml]
 ----
-<entry md5="4114b3e750902c5404ffe4864b3e11b8" path="/Sample.md" />
-<entry md5="193fa5e788a1800a760d1108051c2363" path="/Sample.text" />
+<entry path="/Sample.md"   md5="4114b3e750902c5404ffe4864b3e11b8" />
+<entry path="/Sample.text" md5="193fa5e788a1800a760d1108051c2363" />
 ----
