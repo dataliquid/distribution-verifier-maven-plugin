@@ -17,7 +17,9 @@ package com.dataliquid.maven.distribution.verifier.mojo;
 
 import java.io.File;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -25,6 +27,10 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
+import com.dataliquid.maven.distribution.verifier.report.JUnitReport;
+import com.dataliquid.maven.distribution.verifier.report.Report;
+import com.dataliquid.maven.distribution.verifier.report.XmlReport;
 import com.dataliquid.maven.distribution.verifier.service.VerifierService;
 
 /**
@@ -48,6 +54,9 @@ public class VerifyMojo extends AbstractMojo
     @Parameter(property = "report", defaultValue = "${project.build.directory}/report.xml")
     private String reportFile;
 
+    @Parameter(property = "reportType", defaultValue = "xml")
+    private String reportType;
+
     /**
      * Variables which can be used in whitelist path attribute.
      * 
@@ -68,7 +77,9 @@ public class VerifyMojo extends AbstractMojo
         initialize();
         getLog().info("Verifying the distribution archive file " + distributionArchiveFile);
         VerifierService verifierPluginService = new VerifierService();
-        boolean match = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, reportFile, properties);
+        boolean match = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, properties);
+        List<ResultEntry> verificationResults = verifierPluginService.getVerificationResults();
+        generateReport(verificationResults, reportFile);
         if (match)
         {
             getLog().info("Verification finished successfully.");
@@ -77,6 +88,40 @@ public class VerifyMojo extends AbstractMojo
         {
             throw new MojoExecutionException("Verification failed! Report file generated: " + reportFile);
         }
+    }
+
+    private void generateReport(List<ResultEntry> verificationResults, String reportFile) throws MojoExecutionException
+    {
+        Report report = createReport();
+        try
+        {
+            report.generateReport(verificationResults, reportFile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            getLog().error("Error occurred while creating the repot file:" + e.getMessage());
+            throw new MojoExecutionException("Report generation failed!", e);
+        }
+
+    }
+
+    private Report createReport() throws MojoExecutionException
+    {
+        Report report = null;
+        if (reportType.toLowerCase().trim().equals("xml"))
+        {
+            report = new XmlReport();
+        }
+        else if (reportType.toLowerCase().trim().equals("junit"))
+        {
+            report = new JUnitReport();
+        }
+        else
+        {
+            throw new MojoExecutionException(String.format("reportType [%s] is not a valid reportType use [xml] or [junit]", reportType));
+        }
+        return report;
     }
 
     private void initialize()

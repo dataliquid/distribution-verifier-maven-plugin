@@ -15,8 +15,8 @@
  */
 package com.dataliquid.maven.distribution.verifier.service;
 
-import static org.junit.Assert.*;
-import static org.xmlunit.matchers.CompareMatcher.*;
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 import java.io.File;
 import java.io.IOException;

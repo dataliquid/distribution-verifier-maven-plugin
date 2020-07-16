@@ -17,10 +17,10 @@ package com.dataliquid.maven.distribution.verifier.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -29,27 +29,25 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Node;
-import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
-import org.dom4j.io.XMLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DOMException;
 import org.zeroturnaround.zip.ZipUtil;
 
 import com.dataliquid.maven.distribution.verifier.domain.Entry;
+import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
 import com.dataliquid.maven.distribution.verifier.domain.VerificationStatus;
 
 public class VerifierService
 {
     private static final String EMPTY = "";
     private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final List<ResultEntry> verificationResults = new LinkedList<>();
 
-    public boolean verify(File distributionArchiveFile, File workDirectory, File whitelist, String reportFile,
-            Map<String, String> properties)
+    public boolean verify(File distributionArchiveFile, File workDirectory, File whitelist, Map<String, String> properties)
     {
 
         Boolean verificationStatus = null;
@@ -79,9 +77,9 @@ public class VerifierService
 
             logger.info("Verifying whitelist files against distribution archive");
 
-            verificationStatus = verifyDistributionArchive(destinationDirectory, entries, reportFile, destinationDirectory);
+            verificationStatus = verifyDistributionArchive(destinationDirectory, entries, destinationDirectory);
 
-            logger.info("Verification completed. See the generate report at " + reportFile);
+            logger.info("Verification completed.");
 
         }
         catch (Exception e)
@@ -95,19 +93,16 @@ public class VerifierService
 
     }
 
-    private boolean verifyDistributionArchive(File directory, List<Entry> entries, String reportFile, File originalDirectory)
-            throws Exception
+    private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory) throws Exception
     {
         boolean verificationStatus = true;
 
-        Document document = DocumentHelper.createDocument();
-        Element report = document.addElement("report");
-
         for (Entry entry : entries)
         {
-            Element reportEntry = report.addElement("entry");
-            reportEntry.addAttribute("path", entry.getPath());
-            reportEntry.addAttribute("md5", entry.getMd5());
+            ResultEntry resultEntry = new ResultEntry();
+            verificationResults.add(resultEntry);
+            resultEntry.setPath(entry.getPath());
+            resultEntry.setMd5(entry.getMd5());
 
             File currentFile = new File(directory.getPath().concat(entry.getPath()));
             if (currentFile.exists())
@@ -120,27 +115,22 @@ public class VerifierService
                     if (fileMd5Checksum.equals(entry.getMd5()))
                     {
                         logger.debug("MD5 Checksum of file " + currentFile.getPath() + " is identical to " + entry.getPath());
-
-                        Element result = reportEntry.addElement("result");
-                        result.addAttribute("status", VerificationStatus.SUCCESS.name());
-                        result.addAttribute("message", "Validation passed successfully");
+                        resultEntry.setStatus(VerificationStatus.SUCCESS.name());
+                        resultEntry.setMessage("Validation passed successfully");
                     }
                     else
                     {
                         verificationStatus = false;
 
                         logger.debug("MD5 checksum of file " + currentFile.getPath() + " is different to " + entry.getPath());
-
-                        Element result = reportEntry.addElement("result");
-                        result.addAttribute("status", VerificationStatus.FAILED.name());
-                        result.addAttribute("message", "File found but with a different MD5 Checksum " + fileMd5Checksum);
+                        resultEntry.setStatus(VerificationStatus.FAILED.name());
+                        resultEntry.setMessage("File found but with a different MD5 Checksum " + fileMd5Checksum);
                     }
                 }
                 else
                 {
-                    Element result = reportEntry.addElement("result");
-                    result.addAttribute("status", VerificationStatus.SUCCESS.name());
-                    result.addAttribute("message", "Validation passed successfully");
+                    resultEntry.setStatus(VerificationStatus.SUCCESS.name());
+                    resultEntry.setMessage("Validation passed successfully");
                 }
             }
             else
@@ -149,44 +139,30 @@ public class VerifierService
 
                 logger.debug("Defined file is not found " + entry.getPath() + EMPTY);
 
-                Element result = reportEntry.addElement("result");
-                result.addAttribute("status", VerificationStatus.FAILED.name());
-                result.addAttribute("message", "Defined file not found");
+                resultEntry.setStatus(VerificationStatus.FAILED.name());
+                resultEntry.setMessage("Defined file not found");
             }
 
         }
 
-        boolean verifyAllFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory, report);
+        boolean verifyAllFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory);
         if (!verifyAllFilesInWhitelist)
         {
             verificationStatus = false;
         }
-
-        try (FileWriter writer = new FileWriter(reportFile))
-        {
-            OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter xmlWriter = new XMLWriter(writer, format);
-            xmlWriter.write(document);
-        }
-        catch (Exception e)
-        {
-            throw e;
-        }
-
         return verificationStatus;
     }
 
-    public boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, Element report)
-            throws Exception
+    public boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory) throws Exception
     {
         Integer unexpectedFileCounter = 0;
 
-        verifyAllFilesInWhitelist(directory, whitelistEntries, originalDirectory, report, unexpectedFileCounter);
+        verifyAllFilesInWhitelist(directory, whitelistEntries, originalDirectory, unexpectedFileCounter);
 
         return (unexpectedFileCounter == 0);
     }
 
-    private void verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, Element report,
+    private void verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory,
             Integer unexpectedFileCounter) throws Exception
     {
         File[] directoryEntries = directory.listFiles();
@@ -194,17 +170,17 @@ public class VerifierService
         {
             if (directoryEntry.isDirectory())
             {
-                verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, report, unexpectedFileCounter);
+                verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, unexpectedFileCounter);
             }
             else
             {
-                verifyFileInWhitelist(directoryEntry, whitelistEntries, originalDirectory, report, unexpectedFileCounter);
+                verifyFileInWhitelist(directoryEntry, whitelistEntries, originalDirectory, unexpectedFileCounter);
             }
         }
     }
 
-    private void verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, Element report,
-            Integer unexpectedFileCounter) throws DOMException, NoSuchAlgorithmException, IOException
+    private void verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, Integer unexpectedFileCounter)
+            throws DOMException, NoSuchAlgorithmException, IOException
     {
         boolean exists = false;
         String strippedDirectory = FilenameUtils.normalize(subDirectory.getPath().replace(originalDirectory.getPath(), EMPTY), true);
@@ -218,14 +194,12 @@ public class VerifierService
         }
         if (!exists)
         {
-            Element reportEntry = report.addElement("entry");
-            reportEntry.addAttribute("path", strippedDirectory);
-            reportEntry.addAttribute("md5", getFileChecksum(subDirectory));
-
-            Element result = reportEntry.addElement("result");
-            result.addAttribute("status", VerificationStatus.FAILED.name());
-            result.addAttribute("message", "File is not defined in whitelist");
-
+            ResultEntry resultEntry = new ResultEntry();
+            verificationResults.add(resultEntry);
+            resultEntry.setPath(strippedDirectory);
+            resultEntry.setMd5(getFileChecksum(subDirectory));
+            resultEntry.setStatus(VerificationStatus.FAILED.name());
+            resultEntry.setMessage("File is not defined in whitelist");
             unexpectedFileCounter++;
         }
     }
@@ -292,6 +266,11 @@ public class VerifierService
     private String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException
     {
         return DigestUtils.md5Hex(new FileInputStream(file));
+    }
+
+    public List<ResultEntry> getVerificationResults()
+    {
+        return verificationResults;
     }
 
 }
