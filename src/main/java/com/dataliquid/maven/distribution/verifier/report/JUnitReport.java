@@ -15,14 +15,11 @@
  */
 package com.dataliquid.maven.distribution.verifier.report;
 
-import java.io.FileWriter;
 import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.io.OutputFormat;
-import org.dom4j.io.XMLWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

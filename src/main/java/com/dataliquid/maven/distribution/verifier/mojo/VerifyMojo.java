@@ -28,6 +28,7 @@ import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
+import com.dataliquid.maven.distribution.verifier.domain.VerifierResult;
 import com.dataliquid.maven.distribution.verifier.report.JUnitReport;
 import com.dataliquid.maven.distribution.verifier.report.Report;
 import com.dataliquid.maven.distribution.verifier.report.XmlReport;
@@ -77,10 +78,9 @@ public class VerifyMojo extends AbstractMojo
         initialize();
         getLog().info("Verifying the distribution archive file " + distributionArchiveFile);
         VerifierService verifierPluginService = new VerifierService();
-        boolean match = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, properties);
-        List<ResultEntry> verificationResults = verifierPluginService.getVerificationResults();
-        generateReport(verificationResults, reportFile);
-        if (match)
+        VerifierResult verifierResult = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, properties);
+        generateReport(verifierResult.getResultEntries(), reportFile);
+        if (verifierResult.isValid())
         {
             getLog().info("Verification finished successfully.");
         }

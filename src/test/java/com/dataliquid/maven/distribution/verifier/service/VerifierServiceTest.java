@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
+import com.dataliquid.maven.distribution.verifier.domain.VerifierResult;
 
 public class VerifierServiceTest
 {
@@ -48,7 +49,7 @@ public class VerifierServiceTest
         variables = new HashMap<>();
         outputDirectory = new File("target/");
     }
-
+    
     @Test
     @SuppressWarnings("unchecked")
     public void shouldVerifyValid() throws Exception
@@ -58,10 +59,10 @@ public class VerifierServiceTest
         File distributionArchive = new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip");
     
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
+        VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
     
         // then
-        final List<ResultEntry> verificationResults = verifierService.getVerificationResults();
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();;
         verificationResults.stream().forEach(System.out::println);
         assertThat(verificationResults,contains( 
                 allOf(
@@ -75,7 +76,8 @@ public class VerifierServiceTest
                         hasProperty("path", is("/Sample.txt")),
                         hasProperty("md5", is("193fa5e788a1800a760d1108051c2363")))
                 ));
-
+        
+        assertThat(verifierResult.isValid(), is(true));
     }
 
     @Test
@@ -90,10 +92,10 @@ public class VerifierServiceTest
         variables.put("project.version", "1.0.0");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
+        VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
 
         // then
-        final List<ResultEntry> verificationResults = verifierService.getVerificationResults();
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();;
         verificationResults.stream().forEach(System.out::println);
         assertThat(verificationResults,contains( 
                 allOf(
@@ -107,6 +109,8 @@ public class VerifierServiceTest
                         hasProperty("path", is("/Sample-myartifact.txt")),
                         hasProperty("md5", is("193fa5e788a1800a760d1108051c2363")))
                 ));
+        
+        assertThat(verifierResult.isValid(), is(true));
     }
 
     @Test
@@ -118,10 +122,10 @@ public class VerifierServiceTest
         File distributionArchive = new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
+        VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
 
         // then
-        final List<ResultEntry> verificationResults = verifierService.getVerificationResults();
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
         verificationResults.stream().forEach(System.out::println);
         assertThat(verificationResults,contains( 
                 allOf(
@@ -140,6 +144,8 @@ public class VerifierServiceTest
                         hasProperty("path", is("/Sample.adoc")),
                         hasProperty("md5", is("193fa5e788a1800a760d1108051c7778")))
                 ));
+        
+        assertThat(verifierResult.isValid(), is(false));
     }
 
     @Test
@@ -151,10 +157,10 @@ public class VerifierServiceTest
         File distributionArchive = new File("src/test/resources/invalid-found-undefined-file/invalid_found_undefined_file.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
+        VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
 
         // then
-        final List<ResultEntry> verificationResults = verifierService.getVerificationResults();
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
         verificationResults.stream().forEach(System.out::println);
         assertThat(verificationResults,contains( 
                 allOf(
@@ -173,6 +179,8 @@ public class VerifierServiceTest
                         hasProperty("path", is("/Sample.adoc")),
                         hasProperty("md5", is("0430eba9643b5e60e49c055eb16cbf7a")))
                 ));
+        
+        assertThat(verifierResult.isValid(), is(false));
     }
 
     @Test
@@ -184,10 +192,10 @@ public class VerifierServiceTest
         File distributionArchive = new File("src/test/resources/invalid-different-md5-checksum/invalid_different_md5_checksum.zip");
 
         // when
-        verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
+        VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
 
         // then
-        final List<ResultEntry> verificationResults = verifierService.getVerificationResults();
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
         verificationResults.stream().forEach(System.out::println);
         assertThat(verificationResults,contains( 
                 allOf(
@@ -201,5 +209,7 @@ public class VerifierServiceTest
                         hasProperty("path", is("/Sample.txt")),
                         hasProperty("md5", is("193fa5e788a1800a760d1108051c4711")))
                 ));
+        
+        assertThat(verifierResult.isValid(), is(false));
     }
 }

@@ -40,30 +40,20 @@ import org.zeroturnaround.zip.ZipUtil;
 import com.dataliquid.maven.distribution.verifier.domain.Entry;
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
 import com.dataliquid.maven.distribution.verifier.domain.VerificationStatus;
+import com.dataliquid.maven.distribution.verifier.domain.VerifierResult;
 
 public class VerifierService
 {
     private static final String EMPTY = "";
     private final Logger logger = LoggerFactory.getLogger(getClass());
-    private final List<ResultEntry> verificationResults = new LinkedList<>();
 
-    public boolean verify(File distributionArchiveFile, File workDirectory, File whitelist, Map<String, String> properties)
+    public VerifierResult verify(File distributionArchiveFile, File workDirectory, File whitelist, Map<String, String> properties)
     {
-
-        Boolean verificationStatus = null;
+        List<ResultEntry> verificationResults = new LinkedList<>();
+        boolean verificationStatus = false;
         try
         {
-            File destinationDirectory = null;
-            if (workDirectory != null)
-            {
-                String distributionWorkDirectory = distributionArchiveFile.getName().concat("-unzipped");
-                destinationDirectory = new File(workDirectory, distributionWorkDirectory);
-            }
-            else
-            {
-                String name = distributionArchiveFile.getName().concat("-unzipped");
-                destinationDirectory = new File(distributionArchiveFile.getParentFile(), name);
-            }
+            File destinationDirectory = determineDestinationDirectory(distributionArchiveFile, workDirectory);
 
             logger.info("Unzip distribution archive file " + distributionArchiveFile.getPath() + " to " + destinationDirectory);
 
@@ -77,7 +67,7 @@ public class VerifierService
 
             logger.info("Verifying whitelist files against distribution archive");
 
-            verificationStatus = verifyDistributionArchive(destinationDirectory, entries, destinationDirectory);
+            verificationStatus = verifyDistributionArchive(destinationDirectory, entries, destinationDirectory,verificationResults);
 
             logger.info("Verification completed.");
 
@@ -86,14 +76,29 @@ public class VerifierService
         {
             e.printStackTrace();
             logger.error("Error occurred : {}", e.getMessage(), e);
-            verificationStatus = false;
         }
 
-        return verificationStatus;
+        return new VerifierResult(verificationStatus, verificationResults);
 
     }
 
-    private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory) throws Exception
+    private File determineDestinationDirectory(File distributionArchiveFile, File workDirectory)
+    {
+        File destinationDirectory = null;
+        if (workDirectory != null)
+        {
+            String distributionWorkDirectory = distributionArchiveFile.getName().concat("-unzipped");
+            destinationDirectory = new File(workDirectory, distributionWorkDirectory);
+        }
+        else
+        {
+            String name = distributionArchiveFile.getName().concat("-unzipped");
+            destinationDirectory = new File(distributionArchiveFile.getParentFile(), name);
+        }
+        return destinationDirectory;
+    }
+
+    private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory, List<ResultEntry> verificationResults) throws Exception
     {
         boolean verificationStatus = true;
 
@@ -145,7 +150,7 @@ public class VerifierService
 
         }
 
-        boolean verifyAllFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory);
+        boolean verifyAllFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory, verificationResults);
         if (!verifyAllFilesInWhitelist)
         {
             verificationStatus = false;
@@ -153,33 +158,31 @@ public class VerifierService
         return verificationStatus;
     }
 
-    public boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory) throws Exception
+    private boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, List<ResultEntry> verificationResults) throws Exception
     {
-        Integer unexpectedFileCounter = 0;
-
-        verifyAllFilesInWhitelist(directory, whitelistEntries, originalDirectory, unexpectedFileCounter);
-
-        return (unexpectedFileCounter == 0);
-    }
-
-    private void verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory,
-            Integer unexpectedFileCounter) throws Exception
-    {
+        boolean allFilesFound = true;
         File[] directoryEntries = directory.listFiles();
         for (File directoryEntry : directoryEntries)
         {
             if (directoryEntry.isDirectory())
             {
-                verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, unexpectedFileCounter);
+               if(!verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, verificationResults))
+               {
+                   allFilesFound = false;
+               }
             }
             else
             {
-                verifyFileInWhitelist(directoryEntry, whitelistEntries, originalDirectory, unexpectedFileCounter);
+                if (!verifyFileInWhitelist(directoryEntry, whitelistEntries, originalDirectory, verificationResults))
+                {
+                    allFilesFound = false;
+                }
             }
         }
+        return allFilesFound;
     }
 
-    private void verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, Integer unexpectedFileCounter)
+    private boolean verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, List<ResultEntry> verificationResults)
             throws DOMException, NoSuchAlgorithmException, IOException
     {
         boolean exists = false;
@@ -200,8 +203,8 @@ public class VerifierService
             resultEntry.setMd5(getFileChecksum(subDirectory));
             resultEntry.setStatus(VerificationStatus.FAILED.name());
             resultEntry.setMessage("File is not defined in whitelist");
-            unexpectedFileCounter++;
         }
+        return exists;
     }
 
     public List<Entry> loadWhitelist(File whitelist, Map<String, String> properties) throws Exception
@@ -266,11 +269,6 @@ public class VerifierService
     private String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException
     {
         return DigestUtils.md5Hex(new FileInputStream(file));
-    }
-
-    public List<ResultEntry> getVerificationResults()
-    {
-        return verificationResults;
     }
 
 }
