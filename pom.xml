@@ -24,7 +24,7 @@
 	</parent>
 	<groupId>com.dataliquid.maven</groupId>
 	<artifactId>distribution-verifier-maven-plugin</artifactId>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.3</version>
 	<packaging>maven-plugin</packaging>
 	<name>dataliquid :: Distribution Verifier Maven Plugin</name>
 	<description>Verify artifact content against the white list to stabilize the build output.</description>
