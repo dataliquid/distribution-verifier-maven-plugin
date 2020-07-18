@@ -1,0 +1,80 @@
+== Intro
+
+The *Maven Distribution Verifier Plugin* allows verification of `*.jar*`, `*.war*`, `*.ear*` and `*.zip*` files. The content is checked against a defined whitelist. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
+
+If there are any discrepancies in the defined hash values or files that are not defined during the verification process, a report is generated. In this way, the *software artifact* is *additionally hardened* in the *quality assurance* process.
+
+== Whitelist
+
+The whitelist file `whitelist.xml` contains file name, path and the MD5 fingerprint.
+
+[%header,cols=2*] 
+|===
+|Attribute
+|Description
+
+|path
+|File path within the Zip file
+
+|md5
+|File expects md5 hash. The attribute is optional. If missing, only checks whether the file exists.
+|===
+
+
+[source,xml]
+----
+<whitelist>
+  <entry path="/Sample.md" />
+  <entry md5="193fa5e788a1800a760d1108051c2363" path="/Sample.txt" />	
+</whitelist>
+----
+
+== Report
+
+After verification, all results are summarized in a report. The file `report.xml` contains information on both successful and faulty checks.
+
+Each file is shown with a status and message. 
+
+The status can have the following values:
+
+* `SUCCESS`
+* `FAILED`
+
+[source,xml]
+----
+<report>
+ <entry md5="4114b3e750902c5404ffe4864b3e11b8" path="/Sample.md">
+    <result message="Validation passed successfully" status="SUCCESS" />
+ </entry>
+ <entry md5="193fa5e788a1800a760d1108051c4711" path="/Sample.txt">
+    <result message="File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363"
+            status="FAILED" />
+ </entry>
+ <entry md5="193fa5e788a1800a760d1108051c7778" path="/Sample.adoc">
+    <result message="Defined file not found" status="FAILED" />
+ </entry>
+ <entry md5="0430eba9643b5e60e49c055eb16cbf7a" path="/Sample.adoc">
+    <result status="FAILED" message="File is not defined in whitelist" />
+ </entry>
+</report>
+----
+
+
+== Tools
+
+Creating an initial whitelist, the commands `find` and `md5sum` can be combined on linux systems. Listing all files with path and MD5 hash in the whitelist structure, use this command:
+
+[source]
+----
+cd path/to/your/directory
+find * -type f -exec md5sum {} \; | awk '{printf "<entry path=\"/%s\" md5=\"%s\" />%s", $2, $1, "\n"}'
+----
+
+The `<entry>` elements are displayed on the console after the processing has been completed.
+These can then be transferred to your own whitelist.
+
+[source,xml]
+----
+<entry path="/Sample.md"   md5="4114b3e750902c5404ffe4864b3e11b8" />
+<entry path="/Sample.text" md5="193fa5e788a1800a760d1108051c2363" />
+----
