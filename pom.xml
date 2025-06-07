@@ -157,6 +157,9 @@
 					</properties>
 					<excludes>
 						<exclude>LICENSE</exclude>
+						<exclude>.github/**</exclude>
+						<exclude>README.adoc</exclude>
+						<exclude>Jenkinsfile</exclude>
 					</excludes>
 				</configuration>
 				<executions>
@@ -172,7 +175,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
-				<version>3.2</version>
+				<version>3.15.1</version>
 				<configuration>
 					<goalPrefix>distribution-verifier</goalPrefix>
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
