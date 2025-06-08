@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <groupId>com.dataliquid.test</groupId>
+    <artifactId>test-valid-fullmatch</artifactId>
+    <version>1.0.0</version>
+    
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.dataliquid.maven</groupId>
+                <artifactId>distribution-verifier-maven-plugin</artifactId>
+                <version>1.0.4-SNAPSHOT</version>
+                <configuration>
+                    <distributionArchiveFile>${basedir}/src/test/resources/valid-fullmatch/valid_fullmatch.zip</distributionArchiveFile>
+                    <whitelist>${basedir}/src/test/resources/valid-fullmatch/whitelist.xml</whitelist>
+                    <reportType>xml</reportType>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
