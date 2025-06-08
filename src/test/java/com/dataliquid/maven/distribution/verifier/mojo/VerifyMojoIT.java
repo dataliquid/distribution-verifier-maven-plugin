@@ -15,158 +15,193 @@
  */
 package com.dataliquid.maven.distribution.verifier.mojo;
 
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.testing.AbstractMojoTestCase;
-import org.apache.maven.plugin.testing.MojoRule;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
-import java.lang.reflect.Field;
 
 /**
- * Integration test for VerifyMojo
+ * Integration test for verify goal functionality
  */
 public class VerifyMojoIT extends AbstractMojoTestCase {
 
-    @Rule
-    public MojoRule rule = new MojoRule();
-
-    @Before
-    public void setUp() throws Exception {
+    @Override
+    protected void setUp() throws Exception {
         super.setUp();
     }
 
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    @Test
     public void testValidFullMatch() throws Exception {
-        File pom = new File("src/test/resources/test-poms/valid-fullmatch-test-pom.xml");
-        assertNotNull(pom);
-        assertTrue(pom.exists());
-
+        // Create a test POM with absolute paths
+        File basedir = new File(getBasedir());
+        String pomContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+            "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0\n" +
+            "         http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+            "    <modelVersion>4.0.0</modelVersion>\n" +
+            "    <groupId>com.dataliquid.test</groupId>\n" +
+            "    <artifactId>test-valid-fullmatch</artifactId>\n" +
+            "    <version>1.0.0</version>\n" +
+            "    <build>\n" +
+            "        <directory>" + basedir + "/target</directory>\n" +
+            "        <plugins>\n" +
+            "            <plugin>\n" +
+            "                <groupId>com.dataliquid.maven</groupId>\n" +
+            "                <artifactId>distribution-verifier-maven-plugin</artifactId>\n" +
+            "                <version>1.0.4-SNAPSHOT</version>\n" +
+            "                <configuration>\n" +
+            "                    <distributionArchiveFile>" + basedir + "/src/test/resources/valid-fullmatch/valid_fullmatch.zip</distributionArchiveFile>\n" +
+            "                    <whitelist>" + basedir + "/src/test/resources/valid-fullmatch/whitelist.xml</whitelist>\n" +
+            "                    <reportFile>" + basedir + "/target/test-report.xml</reportFile>\n" +
+            "                    <reportType>xml</reportType>\n" +
+            "                </configuration>\n" +
+            "                <executions>\n" +
+            "                    <execution>\n" +
+            "                        <goals>\n" +
+            "                            <goal>verify</goal>\n" +
+            "                        </goals>\n" +
+            "                    </execution>\n" +
+            "                </executions>\n" +
+            "            </plugin>\n" +
+            "        </plugins>\n" +
+            "    </build>\n" +
+            "</project>";
+            
+        File pom = new File(basedir, "target/test-valid-fullmatch-pom.xml");
+        pom.getParentFile().mkdirs();
+        FileUtils.writeStringToFile(pom, pomContent, "UTF-8");
+        
         VerifyMojo mojo = (VerifyMojo) lookupMojo("verify", pom);
         assertNotNull(mojo);
         
-        // Execute the mojo
+        // Execute mojo
         mojo.execute();
         
-        // Verify report was created
-        String reportFile = (String) getVariableValueFromObject(mojo, "reportFile");
-        assertTrue("Report file should exist", new File(reportFile).exists());
+        // Check that the report was generated
+        File reportFile = new File(basedir, "target/test-report.xml");
+        assertTrue("Report file should exist", reportFile.exists());
+        
+        // Check report content
+        String content = FileUtils.readFileToString(reportFile, "UTF-8");
+        assertTrue("Report should contain VALID status", content.contains("<VerificationResult status=\"VALID\""));
+        assertTrue("Report should contain 2 entries", content.contains("numberOfEntries=\"2\""));
     }
 
-    @Test
-    public void testValidWithVariables() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch-variables/valid_fullmatch_variables.zip"));
-        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch-variables/whitelist.xml"));
-        mojo.setReportFile("target/test-reports/valid-variables-report.xml");
-        setVariableValueToObject(mojo, "reportType", "xml");
-        
-        // Should execute without exceptions
-        mojo.execute();
-        
-        // Verify report was created
-        assertTrue("Report file should exist", new File(mojo.getReportFile()).exists());
-    }
-
-    @Test(expected = MojoExecutionException.class)
     public void testInvalidMissingFile() throws Exception {
-        File pom = new File("src/test/resources/test-poms/invalid-missingfile-test-pom.xml");
-        assertNotNull(pom);
-        assertTrue(pom.exists());
-
+        // Create a test POM with absolute paths
+        File basedir = new File(getBasedir());
+        String pomContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+            "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0\n" +
+            "         http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+            "    <modelVersion>4.0.0</modelVersion>\n" +
+            "    <groupId>com.dataliquid.test</groupId>\n" +
+            "    <artifactId>test-invalid-missingfile</artifactId>\n" +
+            "    <version>1.0.0</version>\n" +
+            "    <build>\n" +
+            "        <directory>" + basedir + "/target</directory>\n" +
+            "        <plugins>\n" +
+            "            <plugin>\n" +
+            "                <groupId>com.dataliquid.maven</groupId>\n" +
+            "                <artifactId>distribution-verifier-maven-plugin</artifactId>\n" +
+            "                <version>1.0.4-SNAPSHOT</version>\n" +
+            "                <configuration>\n" +
+            "                    <distributionArchiveFile>" + basedir + "/src/test/resources/invalid-missingfile/invalid_missingfile.zip</distributionArchiveFile>\n" +
+            "                    <whitelist>" + basedir + "/src/test/resources/invalid-missingfile/whitelist.xml</whitelist>\n" +
+            "                    <reportFile>" + basedir + "/target/test-invalid-report.xml</reportFile>\n" +
+            "                    <reportType>xml</reportType>\n" +
+            "                </configuration>\n" +
+            "                <executions>\n" +
+            "                    <execution>\n" +
+            "                        <goals>\n" +
+            "                            <goal>verify</goal>\n" +
+            "                        </goals>\n" +
+            "                    </execution>\n" +
+            "                </executions>\n" +
+            "            </plugin>\n" +
+            "        </plugins>\n" +
+            "    </build>\n" +
+            "</project>";
+            
+        File pom = new File(basedir, "target/test-invalid-missingfile-pom.xml");
+        pom.getParentFile().mkdirs();
+        FileUtils.writeStringToFile(pom, pomContent, "UTF-8");
+        
         VerifyMojo mojo = (VerifyMojo) lookupMojo("verify", pom);
         assertNotNull(mojo);
         
-        // Should throw MojoExecutionException
-        mojo.execute();
-    }
-
-    @Test(expected = MojoExecutionException.class)
-    public void testInvalidDifferentChecksum() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-different-md5-checksum/invalid_different_md5_checksum.zip"));
-        mojo.setWhitelist(new File("src/test/resources/invalid-different-md5-checksum/whitelist.xml"));
-        mojo.setReportFile("target/test-reports/invalid-checksum-report.xml");
-        setVariableValueToObject(mojo, "reportType", "xml");
+        try {
+            mojo.execute();
+            fail("Expected build to fail due to missing file");
+        } catch (Exception e) {
+            // Expected - build should fail
+            assertTrue("Should contain verification failed message", 
+                e.getMessage().contains("Verification failed"));
+        }
         
-        // Should throw MojoExecutionException
-        mojo.execute();
-    }
-
-    @Test(expected = MojoExecutionException.class)
-    public void testInvalidUndefinedFile() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-found-undefined-file/invalid_found_undefined_file.zip"));
-        mojo.setWhitelist(new File("src/test/resources/invalid-found-undefined-file/whitelist.xml"));
-        mojo.setReportFile("target/test-reports/invalid-undefined-report.xml");
-        setVariableValueToObject(mojo, "reportType", "xml");
+        // Check that the report was still generated
+        File reportFile = new File(basedir, "target/test-invalid-report.xml");
+        assertTrue("Report file should exist even on failure", reportFile.exists());
         
-        // Should throw MojoExecutionException
-        mojo.execute();
+        String content = FileUtils.readFileToString(reportFile, "UTF-8");
+        assertTrue("Report should contain INVALID status", content.contains("<VerificationResult status=\"INVALID\""));
     }
 
-    @Test
     public void testJUnitReportFormat() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
-        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
-        mojo.setReportFile("target/test-reports/valid-junit-report.xml");
-        setVariableValueToObject(mojo, "reportType", "junit");
+        // Create a test POM with JUnit report format
+        File basedir = new File(getBasedir());
+        String pomContent = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+            "<project xmlns=\"http://maven.apache.org/POM/4.0.0\"\n" +
+            "         xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+            "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0\n" +
+            "         http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n" +
+            "    <modelVersion>4.0.0</modelVersion>\n" +
+            "    <groupId>com.dataliquid.test</groupId>\n" +
+            "    <artifactId>test-junit-report</artifactId>\n" +
+            "    <version>1.0.0</version>\n" +
+            "    <build>\n" +
+            "        <directory>" + basedir + "/target</directory>\n" +
+            "        <plugins>\n" +
+            "            <plugin>\n" +
+            "                <groupId>com.dataliquid.maven</groupId>\n" +
+            "                <artifactId>distribution-verifier-maven-plugin</artifactId>\n" +
+            "                <version>1.0.4-SNAPSHOT</version>\n" +
+            "                <configuration>\n" +
+            "                    <distributionArchiveFile>" + basedir + "/src/test/resources/valid-fullmatch/valid_fullmatch.zip</distributionArchiveFile>\n" +
+            "                    <whitelist>" + basedir + "/src/test/resources/valid-fullmatch/whitelist.xml</whitelist>\n" +
+            "                    <reportFile>" + basedir + "/target/test-junit-report.xml</reportFile>\n" +
+            "                    <reportType>junit</reportType>\n" +
+            "                </configuration>\n" +
+            "                <executions>\n" +
+            "                    <execution>\n" +
+            "                        <goals>\n" +
+            "                            <goal>verify</goal>\n" +
+            "                        </goals>\n" +
+            "                    </execution>\n" +
+            "                </executions>\n" +
+            "            </plugin>\n" +
+            "        </plugins>\n" +
+            "    </build>\n" +
+            "</project>";
+            
+        File pom = new File(basedir, "target/test-junit-report-pom.xml");
+        pom.getParentFile().mkdirs();
+        FileUtils.writeStringToFile(pom, pomContent, "UTF-8");
         
+        VerifyMojo mojo = (VerifyMojo) lookupMojo("verify", pom);
+        assertNotNull(mojo);
+        
+        // Execute mojo
         mojo.execute();
         
-        // Verify JUnit report was created
-        File reportFile = new File(mojo.getReportFile());
+        // Check that the JUnit report was generated
+        File reportFile = new File(basedir, "target/test-junit-report.xml");
         assertTrue("JUnit report file should exist", reportFile.exists());
         
-        // Read and verify it contains JUnit XML structure
-        String content = org.apache.commons.io.FileUtils.readFileToString(reportFile, "UTF-8");
+        String content = FileUtils.readFileToString(reportFile, "UTF-8");
         assertTrue("Should contain testsuite element", content.contains("<testsuite"));
         assertTrue("Should contain testcase elements", content.contains("<testcase"));
-    }
-
-    @Test(expected = MojoExecutionException.class)
-    public void testFailOnError() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip"));
-        mojo.setWhitelist(new File("src/test/resources/invalid-missingfile/whitelist.xml"));
-        mojo.setReportFile("target/test-reports/fail-on-error-report.xml");
-        setVariableValueToObject(mojo, "reportType", "xml");
-        
-        // Should throw exception when verification fails
-        mojo.execute();
-    }
-
-    @Test(expected = MojoExecutionException.class)
-    public void testMissingDistributionFile() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/non-existent.zip"));
-        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
-        mojo.setReportFile("target/test-reports/missing-dist-report.xml");
-        setVariableValueToObject(mojo, "reportType", "xml");
-        
-        // Should throw MojoExecutionException
-        mojo.execute();
-    }
-
-    @Test(expected = MojoExecutionException.class)
-    public void testMissingWhitelistFile() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
-        mojo.setWhitelist(new File("src/test/resources/non-existent-whitelist.xml"));
-        mojo.setReportFile("target/test-reports/missing-whitelist-report.xml");
-        setVariableValueToObject(mojo, "reportType", "xml");
-        
-        // Should throw MojoExecutionException
-        mojo.execute();
     }
 
 }

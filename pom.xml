@@ -162,7 +162,7 @@
 		<dependency>
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-xml</artifactId>
-			<version>3.0.1</version>
+			<version>4.0.4</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -252,7 +252,6 @@
 					<systemPropertyVariables>
 						<slf4j.provider>org.slf4j.simple.SimpleServiceProvider</slf4j.provider>
 					</systemPropertyVariables>
-					<skipTests>true</skipTests>
 				</configuration>
 				<executions>
 					<execution>
