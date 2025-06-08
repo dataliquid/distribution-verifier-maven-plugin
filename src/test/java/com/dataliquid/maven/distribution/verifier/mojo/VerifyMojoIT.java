@@ -15,65 +15,169 @@
  */
 package com.dataliquid.maven.distribution.verifier.mojo;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+import org.apache.maven.plugin.testing.MojoRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 import java.io.File;
-
-import static org.junit.Assert.*;
 
 /**
  * Integration test for VerifyMojo
  */
-public class VerifyMojoIT {
+public class VerifyMojoIT extends AbstractMojoTestCase {
 
-    @Test
-    public void testVerifyMojoInstantiation() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        assertNotNull("Mojo should be instantiated", mojo);
+    @Rule
+    public MojoRule rule = new MojoRule();
+
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 
     @Test
     public void testValidFullMatch() throws Exception {
-        // Test can be run with Maven directly using the test POMs
-        // mvn -f src/test/resources/test-poms/valid-fullmatch-test-pom.xml distribution-verifier:verify
-        assertTrue("Valid full match test pom exists", 
-            new File("src/test/resources/test-poms/valid-fullmatch-test-pom.xml").exists());
+        File pom = new File("src/test/resources/test-poms/valid-fullmatch-test-pom.xml");
+        assertNotNull(pom);
+        assertTrue(pom.exists());
+
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
+        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/valid-fullmatch-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
+        
+        // Should execute without exceptions
+        mojo.execute();
+        
+        // Verify report was created
+        assertTrue("Report file should exist", mojo.getOutputFile().exists());
     }
 
     @Test
     public void testValidWithVariables() throws Exception {
-        // Test distribution with variable substitution
-        File distributionFile = new File("src/test/resources/valid-fullmatch-variables/valid_fullmatch_variables.zip");
-        File whitelistFile = new File("src/test/resources/valid-fullmatch-variables/whitelist.xml");
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch-variables/valid_fullmatch_variables.zip"));
+        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch-variables/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/valid-variables-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
         
-        assertTrue("Distribution file exists", distributionFile.exists());
-        assertTrue("Whitelist file exists", whitelistFile.exists());
+        // Should execute without exceptions
+        mojo.execute();
+        
+        // Verify report was created
+        assertTrue("Report file should exist", mojo.getOutputFile().exists());
     }
 
-    @Test
+    @Test(expected = MojoFailureException.class)
     public void testInvalidMissingFile() throws Exception {
-        // Test can be run with Maven directly using the test POMs
-        // This should fail: mvn -f src/test/resources/test-poms/invalid-missingfile-test-pom.xml distribution-verifier:verify
-        assertTrue("Invalid missing file test pom exists", 
-            new File("src/test/resources/test-poms/invalid-missingfile-test-pom.xml").exists());
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip"));
+        mojo.setWhitelist(new File("src/test/resources/invalid-missingfile/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/invalid-missing-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
+        
+        // Should throw MojoFailureException
+        mojo.execute();
     }
 
-    @Test
+    @Test(expected = MojoFailureException.class)
     public void testInvalidDifferentChecksum() throws Exception {
-        // Test distribution with different checksum
-        File distributionFile = new File("src/test/resources/invalid-different-md5-checksum/invalid_different_md5_checksum.zip");
-        File whitelistFile = new File("src/test/resources/invalid-different-md5-checksum/whitelist.xml");
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-different-md5-checksum/invalid_different_md5_checksum.zip"));
+        mojo.setWhitelist(new File("src/test/resources/invalid-different-md5-checksum/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/invalid-checksum-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
         
-        assertTrue("Distribution file exists", distributionFile.exists());
-        assertTrue("Whitelist file exists", whitelistFile.exists());
+        // Should throw MojoFailureException
+        mojo.execute();
+    }
+
+    @Test(expected = MojoFailureException.class)
+    public void testInvalidUndefinedFile() throws Exception {
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-found-undefined-file/invalid_found_undefined_file.zip"));
+        mojo.setWhitelist(new File("src/test/resources/invalid-found-undefined-file/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/invalid-undefined-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
+        
+        // Should throw MojoFailureException
+        mojo.execute();
     }
 
     @Test
-    public void testInvalidUndefinedFile() throws Exception {
-        // Test distribution with undefined file
-        File distributionFile = new File("src/test/resources/invalid-found-undefined-file/invalid_found_undefined_file.zip");
-        File whitelistFile = new File("src/test/resources/invalid-found-undefined-file/whitelist.xml");
+    public void testJUnitReportFormat() throws Exception {
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
+        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/valid-junit-report.xml"));
+        mojo.setReportFormat("junit");
+        mojo.setFailOnError(true);
         
-        assertTrue("Distribution file exists", distributionFile.exists());
-        assertTrue("Whitelist file exists", whitelistFile.exists());
+        mojo.execute();
+        
+        // Verify JUnit report was created
+        File reportFile = mojo.getOutputFile();
+        assertTrue("JUnit report file should exist", reportFile.exists());
+        
+        // Read and verify it contains JUnit XML structure
+        String content = org.apache.commons.io.FileUtils.readFileToString(reportFile, "UTF-8");
+        assertTrue("Should contain testsuite element", content.contains("<testsuite"));
+        assertTrue("Should contain testcase elements", content.contains("<testcase"));
+    }
+
+    @Test
+    public void testFailOnErrorFalse() throws Exception {
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip"));
+        mojo.setWhitelist(new File("src/test/resources/invalid-missingfile/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/fail-on-error-false-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(false);
+        
+        // Should NOT throw exception when failOnError is false
+        mojo.execute();
+        
+        // But report should still be created
+        assertTrue("Report file should exist", mojo.getOutputFile().exists());
+    }
+
+    @Test(expected = MojoExecutionException.class)
+    public void testMissingDistributionFile() throws Exception {
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/non-existent.zip"));
+        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/missing-dist-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
+        
+        // Should throw MojoExecutionException
+        mojo.execute();
+    }
+
+    @Test(expected = MojoExecutionException.class)
+    public void testMissingWhitelistFile() throws Exception {
+        VerifyMojo mojo = new VerifyMojo();
+        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
+        mojo.setWhitelist(new File("src/test/resources/non-existent-whitelist.xml"));
+        mojo.setOutputFile(new File("target/test-reports/missing-whitelist-report.xml"));
+        mojo.setReportFormat("xml");
+        mojo.setFailOnError(true);
+        
+        // Should throw MojoExecutionException
+        mojo.execute();
     }
 }
