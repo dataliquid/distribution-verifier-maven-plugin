@@ -32,4 +32,4 @@ jobs:
       run: mvn test -B
     
     - name: Verify distribution
-      run: mvn distribution-verifier:verify -B -DdistributionFile=target/test-classes/valid-fullmatch/valid_fullmatch.zip -DwhitelistFile=target/test-classes/valid-fullmatch/whitelist.xml
+      run: mvn com.dataliquid.maven:distribution-verifier-maven-plugin:1.0.4-SNAPSHOT:verify -B -DdistributionFile=target/test-classes/valid-fullmatch/valid_fullmatch.zip -DwhitelistFile=target/test-classes/valid-fullmatch/whitelist.xml
