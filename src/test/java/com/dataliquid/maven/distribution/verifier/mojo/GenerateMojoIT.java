@@ -176,7 +176,7 @@ public class GenerateMojoIT extends AbstractMojoTestCase {
         
         // Verify the file was overwritten
         assertTrue("Whitelist file should still exist", outputFile.exists());
-        assertNotEquals("File content should have changed", originalLength, outputFile.length());
+        assertFalse("File content should have changed", originalLength == outputFile.length());
         
         String content = FileUtils.readFileToString(outputFile, "UTF-8");
         assertFalse("Should not contain test entry", content.contains("path=\"/test\""));
