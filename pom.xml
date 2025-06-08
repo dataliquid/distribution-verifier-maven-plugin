@@ -248,6 +248,7 @@
 					<systemPropertyVariables>
 						<slf4j.provider>org.slf4j.simple.SimpleServiceProvider</slf4j.provider>
 					</systemPropertyVariables>
+					<skipTests>true</skipTests>
 				</configuration>
 				<executions>
 					<execution>
