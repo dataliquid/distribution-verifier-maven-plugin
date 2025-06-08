@@ -147,6 +147,18 @@
 			<version>2.10.3</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-testing</groupId>
+			<artifactId>maven-plugin-testing-harness</artifactId>
+			<version>3.3.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-compat</artifactId>
+			<version>${maven.version}</version>
+			<scope>test</scope>
+		</dependency>
 
 	</dependencies>
 	<build>
@@ -172,8 +184,8 @@
 						<exclude>.github/**</exclude>
 						<exclude>README.adoc</exclude>
 						<exclude>Jenkinsfile</exclude>
-							<exclude>src/test/java/com/dataliquid/maven/distribution/verifier/mojo/*IT.java</exclude>
-							<exclude>src/test/resources/test-poms/**</exclude>
+						<exclude>src/test/java/com/dataliquid/maven/distribution/verifier/mojo/*IT.java</exclude>
+						<exclude>src/test/resources/test-poms/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
@@ -221,6 +233,24 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.5.3</version>
+				<configuration>
+					<systemPropertyVariables>
+						<slf4j.provider>org.slf4j.simple.SimpleServiceProvider</slf4j.provider>
+					</systemPropertyVariables>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
