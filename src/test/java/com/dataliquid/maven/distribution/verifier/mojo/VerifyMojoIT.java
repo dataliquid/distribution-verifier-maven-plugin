@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
 import java.io.File;
+import java.lang.reflect.Field;
 
 /**
  * Integration test for VerifyMojo
@@ -49,18 +50,15 @@ public class VerifyMojoIT extends AbstractMojoTestCase {
         assertNotNull(pom);
         assertTrue(pom.exists());
 
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
-        mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/valid-fullmatch-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        VerifyMojo mojo = (VerifyMojo) lookupMojo("verify", pom);
+        assertNotNull(mojo);
         
-        // Should execute without exceptions
+        // Execute the mojo
         mojo.execute();
         
         // Verify report was created
-        assertTrue("Report file should exist", mojo.getOutputFile().exists());
+        String reportFile = (String) getVariableValueFromObject(mojo, "reportFile");
+        assertTrue("Report file should exist", new File(reportFile).exists());
     }
 
     @Test
@@ -68,53 +66,50 @@ public class VerifyMojoIT extends AbstractMojoTestCase {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch-variables/valid_fullmatch_variables.zip"));
         mojo.setWhitelist(new File("src/test/resources/valid-fullmatch-variables/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/valid-variables-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        mojo.setReportFile("target/test-reports/valid-variables-report.xml");
+        setVariableValueToObject(mojo, "reportType", "xml");
         
         // Should execute without exceptions
         mojo.execute();
         
         // Verify report was created
-        assertTrue("Report file should exist", mojo.getOutputFile().exists());
+        assertTrue("Report file should exist", new File(mojo.getReportFile()).exists());
     }
 
-    @Test(expected = MojoFailureException.class)
+    @Test(expected = MojoExecutionException.class)
     public void testInvalidMissingFile() throws Exception {
-        VerifyMojo mojo = new VerifyMojo();
-        mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip"));
-        mojo.setWhitelist(new File("src/test/resources/invalid-missingfile/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/invalid-missing-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        File pom = new File("src/test/resources/test-poms/invalid-missingfile-test-pom.xml");
+        assertNotNull(pom);
+        assertTrue(pom.exists());
+
+        VerifyMojo mojo = (VerifyMojo) lookupMojo("verify", pom);
+        assertNotNull(mojo);
         
-        // Should throw MojoFailureException
+        // Should throw MojoExecutionException
         mojo.execute();
     }
 
-    @Test(expected = MojoFailureException.class)
+    @Test(expected = MojoExecutionException.class)
     public void testInvalidDifferentChecksum() throws Exception {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-different-md5-checksum/invalid_different_md5_checksum.zip"));
         mojo.setWhitelist(new File("src/test/resources/invalid-different-md5-checksum/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/invalid-checksum-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        mojo.setReportFile("target/test-reports/invalid-checksum-report.xml");
+        setVariableValueToObject(mojo, "reportType", "xml");
         
-        // Should throw MojoFailureException
+        // Should throw MojoExecutionException
         mojo.execute();
     }
 
-    @Test(expected = MojoFailureException.class)
+    @Test(expected = MojoExecutionException.class)
     public void testInvalidUndefinedFile() throws Exception {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-found-undefined-file/invalid_found_undefined_file.zip"));
         mojo.setWhitelist(new File("src/test/resources/invalid-found-undefined-file/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/invalid-undefined-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        mojo.setReportFile("target/test-reports/invalid-undefined-report.xml");
+        setVariableValueToObject(mojo, "reportType", "xml");
         
-        // Should throw MojoFailureException
+        // Should throw MojoExecutionException
         mojo.execute();
     }
 
@@ -123,14 +118,13 @@ public class VerifyMojoIT extends AbstractMojoTestCase {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
         mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/valid-junit-report.xml"));
-        mojo.setReportFormat("junit");
-        mojo.setFailOnError(true);
+        mojo.setReportFile("target/test-reports/valid-junit-report.xml");
+        setVariableValueToObject(mojo, "reportType", "junit");
         
         mojo.execute();
         
         // Verify JUnit report was created
-        File reportFile = mojo.getOutputFile();
+        File reportFile = new File(mojo.getReportFile());
         assertTrue("JUnit report file should exist", reportFile.exists());
         
         // Read and verify it contains JUnit XML structure
@@ -139,20 +133,16 @@ public class VerifyMojoIT extends AbstractMojoTestCase {
         assertTrue("Should contain testcase elements", content.contains("<testcase"));
     }
 
-    @Test
-    public void testFailOnErrorFalse() throws Exception {
+    @Test(expected = MojoExecutionException.class)
+    public void testFailOnError() throws Exception {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/invalid-missingfile/invalid_missingfile.zip"));
         mojo.setWhitelist(new File("src/test/resources/invalid-missingfile/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/fail-on-error-false-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(false);
+        mojo.setReportFile("target/test-reports/fail-on-error-report.xml");
+        setVariableValueToObject(mojo, "reportType", "xml");
         
-        // Should NOT throw exception when failOnError is false
+        // Should throw exception when verification fails
         mojo.execute();
-        
-        // But report should still be created
-        assertTrue("Report file should exist", mojo.getOutputFile().exists());
     }
 
     @Test(expected = MojoExecutionException.class)
@@ -160,9 +150,8 @@ public class VerifyMojoIT extends AbstractMojoTestCase {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/non-existent.zip"));
         mojo.setWhitelist(new File("src/test/resources/valid-fullmatch/whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/missing-dist-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        mojo.setReportFile("target/test-reports/missing-dist-report.xml");
+        setVariableValueToObject(mojo, "reportType", "xml");
         
         // Should throw MojoExecutionException
         mojo.execute();
@@ -173,11 +162,11 @@ public class VerifyMojoIT extends AbstractMojoTestCase {
         VerifyMojo mojo = new VerifyMojo();
         mojo.setDistributionArchiveFile(new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip"));
         mojo.setWhitelist(new File("src/test/resources/non-existent-whitelist.xml"));
-        mojo.setOutputFile(new File("target/test-reports/missing-whitelist-report.xml"));
-        mojo.setReportFormat("xml");
-        mojo.setFailOnError(true);
+        mojo.setReportFile("target/test-reports/missing-whitelist-report.xml");
+        setVariableValueToObject(mojo, "reportType", "xml");
         
         // Should throw MojoExecutionException
         mojo.execute();
     }
+
 }
