@@ -19,6 +19,11 @@ If there are any discrepancies in the defined hash values or files that are not 
 * JUnit report format support
 * Maven integration
 
+== Requirements
+
+* Java 11 or higher
+* Maven 3.6.0 or higher
+
 == Quick Start
 
 Add the plugin to your Maven `pom.xml`:
