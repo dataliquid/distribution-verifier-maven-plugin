@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>com.dataliquid</groupId>
 		<artifactId>parent-oss</artifactId>
-		<version>1.1.0</version>
+		<version>2.0.0</version>
 	</parent>
 	<groupId>com.dataliquid.maven</groupId>
 	<artifactId>distribution-verifier-maven-plugin</artifactId>
@@ -154,7 +154,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
 				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
@@ -164,7 +163,7 @@
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<configuration>
-					<header>https://raw.githubusercontent.com/dataliquid/parent-oss/1.0.0/src/main/resources/licence/APACHE-2.tmpl.txt</header>
+					<header>https://raw.githubusercontent.com/dataliquid/parent-oss/2.0.0/src/main/resources/licence/APACHE-2.tmpl.txt</header>
 					<properties>
 						<owner>dataliquid GmbH</owner>
 						<website>www.dataliquid.com</website>
@@ -212,7 +211,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.3</version>
 				<configuration>
 					<systemPropertyVariables>
 						<slf4j.provider>org.slf4j.simple.SimpleServiceProvider</slf4j.provider>
@@ -222,7 +220,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.3.1</version>
 			</plugin>
 		</plugins>
 	</build>
