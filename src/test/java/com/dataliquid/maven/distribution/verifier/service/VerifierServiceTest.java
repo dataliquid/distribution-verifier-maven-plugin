@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
 import com.dataliquid.maven.distribution.verifier.domain.VerifierResult;
@@ -42,7 +42,7 @@ public class VerifierServiceTest
 
     private Map<String, String> variables;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException
     {
         verifierService = new VerifierService();

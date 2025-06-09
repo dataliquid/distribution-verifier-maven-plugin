@@ -15,14 +15,14 @@
  */
 package com.dataliquid.maven.distribution.verifier.service;
 
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class GenerateServiceTest
 {
@@ -30,7 +30,7 @@ public class GenerateServiceTest
 
     private File outputDirectory;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException
     {
         verifierService = new GenerateService();
