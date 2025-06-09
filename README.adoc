@@ -1,6 +1,7 @@
 = Maven Distribution Verifier Plugin
 
-image:https://img.shields.io/maven-central/v/com.dataliquid.maven/distribution-verifier-maven-plugin.svg[Maven Central,link=https://search.maven.org/search?q=g:%22com.dataliquid.maven%22%20AND%20a:%22distribution-verifier-maven-plugin%22]
+image:https://github.com/dataliquid/distribution-verifier-maven-plugin/actions/workflows/ci.yml/badge.svg[CI Build,link=https://github.com/dataliquid/distribution-verifier-maven-plugin/actions/workflows/ci.yml]
+image:https://maven-badges.herokuapp.com/maven-central/com.dataliquid.maven/distribution-verifier-maven-plugin/badge.svg[Maven Central,link=https://maven-badges.herokuapp.com/maven-central/com.dataliquid.maven/distribution-verifier-maven-plugin]
 image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[License,link=https://opensource.org/licenses/Apache-2.0]
 
 == Introduction
@@ -214,7 +215,7 @@ Verify a distribution file with default settings:
 <plugin>
   <groupId>com.dataliquid.maven</groupId>
   <artifactId>distribution-verifier-maven-plugin</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.3</version>
   <executions>
     <execution>
       <phase>verify</phase>
