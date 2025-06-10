@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright © 2019 dataliquid GmbH | www.dataliquid.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@ package com.dataliquid.maven.distribution.verifier.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasProperty;
 
@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
 import com.dataliquid.maven.distribution.verifier.domain.VerifierResult;
@@ -42,7 +42,7 @@ public class VerifierServiceTest
 
     private Map<String, String> variables;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException
     {
         verifierService = new VerifierService();

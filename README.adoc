@@ -1,8 +1,138 @@
-== Intro
+= Maven Distribution Verifier Plugin
+
+image:https://github.com/dataliquid/distribution-verifier-maven-plugin/actions/workflows/ci.yml/badge.svg[CI Build,link=https://github.com/dataliquid/distribution-verifier-maven-plugin/actions/workflows/ci.yml]
+image:https://maven-badges.herokuapp.com/maven-central/com.dataliquid.maven/distribution-verifier-maven-plugin/badge.svg[Maven Central,link=https://maven-badges.herokuapp.com/maven-central/com.dataliquid.maven/distribution-verifier-maven-plugin]
+image:https://img.shields.io/badge/License-Apache%202.0-blue.svg[License,link=https://opensource.org/licenses/Apache-2.0]
+
+== Introduction
 
 The *Maven Distribution Verifier Plugin* allows verification of `*.jar*`, `*.war*`, `*.ear*` and `*.zip*` files. The content is checked against a defined whitelist. This ensures that only the expected artifacts with the respective fingerprint are included in your application distribution.
 
 If there are any discrepancies in the defined hash values or files that are not defined during the verification process, a report is generated. In this way, the *software artifact* is *additionally hardened* in the *quality assurance* process.
+
+== Features
+
+* Verify distribution files against a whitelist
+* Support for JAR, WAR, EAR, and ZIP files
+* MD5 checksum validation
+* Generate detailed verification reports
+* JUnit report format support
+* Maven integration
+
+== Requirements
+
+* Java 11 or higher
+* Maven 3.6.0 or higher
+
+== Quick Start
+
+Add the plugin to your Maven `pom.xml`:
+
+[source,xml]
+----
+<build>
+  <plugins>
+    <plugin>
+      <groupId>com.dataliquid.maven</groupId>
+      <artifactId>distribution-verifier-maven-plugin</artifactId>
+      <version>1.0.3</version>
+      <configuration>
+        <distributionFile>${project.build.directory}/${project.build.finalName}.zip</distributionFile>
+        <whitelistFile>${project.basedir}/src/main/resources/whitelist.xml</whitelistFile>
+        <reportFile>${project.build.directory}/distribution-verifier-report.xml</reportFile>
+      </configuration>
+      <executions>
+        <execution>
+          <goals>
+            <goal>verify</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+----
+
+== Goals
+
+The plugin provides two main goals:
+
+=== verify
+
+Verifies a distribution file against a whitelist.
+
+*Parameters:*
+
+[%header,cols="1,1,1,3"] 
+|===
+|Parameter
+|Type
+|Required
+|Description
+
+|distributionFile
+|File
+|Yes
+|The distribution file to verify (JAR, WAR, EAR, or ZIP)
+
+|whitelistFile
+|File
+|Yes
+|The whitelist XML file containing expected entries
+
+|reportFile
+|File
+|No
+|Output report file (default: target/distribution-verifier-report.xml)
+
+|reportFormat
+|String
+|No
+|Report format: "xml" or "junit" (default: "xml")
+
+|failOnError
+|boolean
+|No
+|Fail the build if verification errors are found (default: true)
+|===
+
+*Usage:*
+
+[source,bash]
+----
+mvn distribution-verifier:verify
+----
+
+=== generate
+
+Generates a whitelist from an existing distribution file.
+
+*Parameters:*
+
+[%header,cols="1,1,1,3"] 
+|===
+|Parameter
+|Type
+|Required
+|Description
+
+|distributionFile
+|File
+|Yes
+|The distribution file to analyze
+
+|whitelistFile
+|File
+|Yes
+|Output whitelist file location
+|===
+
+*Usage:*
+
+[source,bash]
+----
+mvn distribution-verifier:generate
+----
 
 == Whitelist
 
@@ -64,7 +194,7 @@ The status can have the following values:
 
 Creating an initial whitelist, the commands `find` and `md5sum` can be combined on linux systems. Listing all files with path and MD5 hash in the whitelist structure, use this command:
 
-[source]
+[source,bash]
 ----
 cd path/to/your/directory
 find * -type f -exec md5sum {} \; | awk '{printf "<entry path=\"/%s\" md5=\"%s\" />%s", $2, $1, "\n"}'
@@ -78,3 +208,61 @@ These can then be transferred to your own whitelist.
 <entry path="/Sample.md"   md5="4114b3e750902c5404ffe4864b3e11b8" />
 <entry path="/Sample.text" md5="193fa5e788a1800a760d1108051c2363" />
 ----
+
+== Examples
+
+=== Basic Verification
+
+Verify a distribution file with default settings:
+
+[source,xml]
+----
+<plugin>
+  <groupId>com.dataliquid.maven</groupId>
+  <artifactId>distribution-verifier-maven-plugin</artifactId>
+  <version>1.0.3</version>
+  <executions>
+    <execution>
+      <phase>verify</phase>
+      <goals>
+        <goal>verify</goal>
+      </goals>
+      <configuration>
+        <distributionFile>${project.build.directory}/${project.build.finalName}.zip</distributionFile>
+        <whitelistFile>src/main/resources/whitelist.xml</whitelistFile>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+----
+
+=== Generate Whitelist from Existing Distribution
+
+[source,bash]
+----
+mvn distribution-verifier:generate \
+  -DdistributionFile=target/myapp.zip \
+  -DwhitelistFile=src/main/resources/whitelist.xml
+----
+
+=== JUnit Report Format
+
+Generate reports in JUnit format for CI/CD integration:
+
+[source,xml]
+----
+<configuration>
+  <distributionFile>${project.build.directory}/${project.build.finalName}.war</distributionFile>
+  <whitelistFile>src/main/resources/whitelist.xml</whitelistFile>
+  <reportFile>${project.build.directory}/surefire-reports/distribution-verifier.xml</reportFile>
+  <reportFormat>junit</reportFormat>
+</configuration>
+----
+
+== Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+== License
+
+This project is licensed under the Apache License 2.0 - see the link:LICENSE[LICENSE] file for details.

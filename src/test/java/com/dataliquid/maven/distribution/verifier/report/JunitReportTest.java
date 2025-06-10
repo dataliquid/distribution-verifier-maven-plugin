@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright © 2019 dataliquid GmbH | www.dataliquid.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
 
@@ -32,7 +32,7 @@ public class JunitReportTest
 {
     private Report reportService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException
     {
         reportService = new JUnitReport();
