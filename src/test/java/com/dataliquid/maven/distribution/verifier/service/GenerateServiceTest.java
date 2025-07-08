@@ -23,6 +23,9 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.xmlunit.builder.Input;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.ElementSelectors;
 
 public class GenerateServiceTest
 {
@@ -49,7 +52,10 @@ public class GenerateServiceTest
         verifierService.generate(distributionArchive, outputDirectory, whitelist);
 
         // then
-        assertThat(expectedWhitelist, isSimilarTo(whitelist).ignoreWhitespace().ignoreComments());
+        assertThat(expectedWhitelist, isSimilarTo(whitelist)
+            .ignoreWhitespace()
+            .ignoreComments()
+            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
 
     }
 
