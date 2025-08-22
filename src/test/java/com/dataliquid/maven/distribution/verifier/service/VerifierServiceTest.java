@@ -49,7 +49,7 @@ public class VerifierServiceTest
         variables = new HashMap<>();
         outputDirectory = new File("target/");
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     public void shouldVerifyValid() throws Exception
@@ -57,26 +57,21 @@ public class VerifierServiceTest
         // given
         File whitelist = new File("src/test/resources/valid-fullmatch/whitelist.xml");
         File distributionArchive = new File("src/test/resources/valid-fullmatch/valid_fullmatch.zip");
-    
+
         // when
         VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
-    
+
         // then
-        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();;
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
+        ;
         verificationResults.stream().forEach(System.out::println);
-        assertThat(verificationResults,contains( 
-                allOf(
-                    hasProperty("status", is("SUCCESS")),
-                    hasProperty("message", is("Validation passed successfully")), 
-                    hasProperty("path", is("/Sample.md")),
-                    hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
-                allOf(
-                        hasProperty("status", is("SUCCESS")),
-                        hasProperty("message", is("Validation passed successfully")), 
-                        hasProperty("path", is("/Sample.txt")),
-                        hasProperty("md5", is("193fa5e788a1800a760d1108051c2363")))
-                ));
-        
+        assertThat(verificationResults,
+                contains(
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.md")), hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.txt")), hasProperty("md5", is("193fa5e788a1800a760d1108051c2363")))));
+
         assertThat(verifierResult.isValid(), is(true));
     }
 
@@ -95,21 +90,15 @@ public class VerifierServiceTest
         VerifierResult verifierResult = verifierService.verify(distributionArchive, outputDirectory, whitelist, variables);
 
         // then
-        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();;
+        final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
+        ;
         verificationResults.stream().forEach(System.out::println);
-        assertThat(verificationResults,contains( 
-                allOf(
-                    hasProperty("status", is("SUCCESS")),
-                    hasProperty("message", is("Validation passed successfully")), 
-                    hasProperty("path", is("/Sample-1.0.0.md")),
-                    hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
-                allOf(
-                        hasProperty("status", is("SUCCESS")),
-                        hasProperty("message", is("Validation passed successfully")), 
-                        hasProperty("path", is("/Sample-myartifact.txt")),
-                        hasProperty("md5", is("193fa5e788a1800a760d1108051c2363")))
-                ));
-        
+        assertThat(verificationResults, contains(
+                allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                        hasProperty("path", is("/Sample-1.0.0.md")), hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
+                allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                        hasProperty("path", is("/Sample-myartifact.txt")), hasProperty("md5", is("193fa5e788a1800a760d1108051c2363")))));
+
         assertThat(verifierResult.isValid(), is(true));
     }
 
@@ -127,24 +116,15 @@ public class VerifierServiceTest
         // then
         final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
         verificationResults.stream().forEach(System.out::println);
-        assertThat(verificationResults,contains( 
-                allOf(
-                    hasProperty("status", is("SUCCESS")),
-                    hasProperty("message", is("Validation passed successfully")), 
-                    hasProperty("path", is("/Sample.md")),
-                    hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
-                allOf(
-                        hasProperty("status", is("SUCCESS")),
-                        hasProperty("message", is("Validation passed successfully")), 
-                        hasProperty("path", is("/Sample.txt")),
-                        hasProperty("md5", is("193fa5e788a1800a760d1108051c2363"))),
-                allOf(
-                        hasProperty("status", is("FAILED")),
-                        hasProperty("message", is("Defined file not found")), 
-                        hasProperty("path", is("/Sample.adoc")),
-                        hasProperty("md5", is("193fa5e788a1800a760d1108051c7778")))
-                ));
-        
+        assertThat(verificationResults,
+                contains(
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.md")), hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.txt")), hasProperty("md5", is("193fa5e788a1800a760d1108051c2363"))),
+                        allOf(hasProperty("status", is("FAILED")), hasProperty("message", is("Defined file not found")),
+                                hasProperty("path", is("/Sample.adoc")), hasProperty("md5", is("193fa5e788a1800a760d1108051c7778")))));
+
         assertThat(verifierResult.isValid(), is(false));
     }
 
@@ -162,24 +142,15 @@ public class VerifierServiceTest
         // then
         final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
         verificationResults.stream().forEach(System.out::println);
-        assertThat(verificationResults,contains( 
-                allOf(
-                    hasProperty("status", is("SUCCESS")),
-                    hasProperty("message", is("Validation passed successfully")), 
-                    hasProperty("path", is("/Sample.md")),
-                    hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
-                allOf(
-                        hasProperty("status", is("SUCCESS")),
-                        hasProperty("message", is("Validation passed successfully")), 
-                        hasProperty("path", is("/Sample.txt")),
-                        hasProperty("md5", is("193fa5e788a1800a760d1108051c2363"))),
-                allOf(
-                        hasProperty("status", is("FAILED")),
-                        hasProperty("message", is("File is not defined in whitelist")), 
-                        hasProperty("path", is("/Sample.adoc")),
-                        hasProperty("md5", is("0430eba9643b5e60e49c055eb16cbf7a")))
-                ));
-        
+        assertThat(verificationResults,
+                contains(
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.md")), hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.txt")), hasProperty("md5", is("193fa5e788a1800a760d1108051c2363"))),
+                        allOf(hasProperty("status", is("FAILED")), hasProperty("message", is("File is not defined in whitelist")),
+                                hasProperty("path", is("/Sample.adoc")), hasProperty("md5", is("0430eba9643b5e60e49c055eb16cbf7a")))));
+
         assertThat(verifierResult.isValid(), is(false));
     }
 
@@ -197,19 +168,14 @@ public class VerifierServiceTest
         // then
         final List<ResultEntry> verificationResults = verifierResult.getResultEntries();
         verificationResults.stream().forEach(System.out::println);
-        assertThat(verificationResults,contains( 
-                allOf(
-                    hasProperty("status", is("SUCCESS")),
-                    hasProperty("message", is("Validation passed successfully")), 
-                    hasProperty("path", is("/Sample.md")),
-                    hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
-                allOf(
-                        hasProperty("status", is("FAILED")),
-                        hasProperty("message", is("File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363")), 
-                        hasProperty("path", is("/Sample.txt")),
-                        hasProperty("md5", is("193fa5e788a1800a760d1108051c4711")))
-                ));
-        
+        assertThat(verificationResults,
+                contains(
+                        allOf(hasProperty("status", is("SUCCESS")), hasProperty("message", is("Validation passed successfully")),
+                                hasProperty("path", is("/Sample.md")), hasProperty("md5", is("4114b3e750902c5404ffe4864b3e11b8"))),
+                        allOf(hasProperty("status", is("FAILED")),
+                                hasProperty("message", is("File found but with a different MD5 Checksum 193fa5e788a1800a760d1108051c2363")),
+                                hasProperty("path", is("/Sample.txt")), hasProperty("md5", is("193fa5e788a1800a760d1108051c4711")))));
+
         assertThat(verifierResult.isValid(), is(false));
     }
 }
