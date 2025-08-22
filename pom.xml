@@ -154,7 +154,7 @@
 				<groupId>net.revelc.code.formatter</groupId>
 				<artifactId>formatter-maven-plugin</artifactId>
 				<configuration>
-					<configFile>codestyles/tradional/eclipse-codestyle.xml</configFile>
+					<configFile>codestyles/traditional/eclipse-codestyle.xml</configFile>
 				</configuration>
 			</plugin>
 			<plugin>
