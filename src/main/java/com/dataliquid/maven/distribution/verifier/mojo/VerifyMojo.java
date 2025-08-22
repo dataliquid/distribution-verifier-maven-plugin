@@ -60,7 +60,7 @@ public class VerifyMojo extends AbstractMojo
 
     /**
      * Variables which can be used in whitelist path attribute.
-     * 
+     *
      * <pre>
      * <configuration>
      *   <environments>

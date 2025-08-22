@@ -67,7 +67,7 @@ public class VerifierService
 
             logger.info("Verifying whitelist files against distribution archive");
 
-            verificationStatus = verifyDistributionArchive(destinationDirectory, entries, destinationDirectory,verificationResults);
+            verificationStatus = verifyDistributionArchive(destinationDirectory, entries, destinationDirectory, verificationResults);
 
             logger.info("Verification completed.");
 
@@ -98,7 +98,8 @@ public class VerifierService
         return destinationDirectory;
     }
 
-    private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory, List<ResultEntry> verificationResults) throws Exception
+    private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory,
+            List<ResultEntry> verificationResults) throws Exception
     {
         boolean verificationStatus = true;
 
@@ -158,7 +159,8 @@ public class VerifierService
         return verificationStatus;
     }
 
-    private boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory, List<ResultEntry> verificationResults) throws Exception
+    private boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory,
+            List<ResultEntry> verificationResults) throws Exception
     {
         boolean allFilesFound = true;
         File[] directoryEntries = directory.listFiles();
@@ -166,10 +168,10 @@ public class VerifierService
         {
             if (directoryEntry.isDirectory())
             {
-               if(!verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, verificationResults))
-               {
-                   allFilesFound = false;
-               }
+                if (!verifyAllFilesInWhitelist(directoryEntry, whitelistEntries, originalDirectory, verificationResults))
+                {
+                    allFilesFound = false;
+                }
             }
             else
             {
@@ -182,8 +184,8 @@ public class VerifierService
         return allFilesFound;
     }
 
-    private boolean verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory, List<ResultEntry> verificationResults)
-            throws DOMException, NoSuchAlgorithmException, IOException
+    private boolean verifyFileInWhitelist(File subDirectory, List<Entry> entries, File originalDirectory,
+            List<ResultEntry> verificationResults) throws DOMException, NoSuchAlgorithmException, IOException
     {
         boolean exists = false;
         String strippedDirectory = FilenameUtils.normalize(subDirectory.getPath().replace(originalDirectory.getPath(), EMPTY), true);
@@ -240,7 +242,7 @@ public class VerifierService
 
     /**
      * Evaluate variable within given string value
-     * 
+     *
      * @param value
      *            lorem ${var} elit
      * @param variables

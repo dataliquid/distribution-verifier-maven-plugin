@@ -22,14 +22,14 @@ public class VerifierResult
 
     private final boolean valid;
     private final List<ResultEntry> resultEntries;
-    
+
     public VerifierResult(boolean valid, List<ResultEntry> resultEntries)
     {
         super();
         this.valid = valid;
         this.resultEntries = resultEntries;
     }
-    
+
     public boolean isValid()
     {
         return valid;
@@ -39,7 +39,7 @@ public class VerifierResult
     {
         return resultEntries;
     }
-    
+
     @Override
     public int hashCode()
     {
@@ -49,7 +49,7 @@ public class VerifierResult
         result = prime * result + (valid ? 1231 : 1237);
         return result;
     }
-    
+
     @Override
     public boolean equals(Object obj)
     {
@@ -71,6 +71,7 @@ public class VerifierResult
             return false;
         return true;
     }
+
     @Override
     public String toString()
     {

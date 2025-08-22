@@ -52,10 +52,8 @@ public class GenerateServiceTest
         verifierService.generate(distributionArchive, outputDirectory, whitelist);
 
         // then
-        assertThat(expectedWhitelist, isSimilarTo(whitelist)
-            .ignoreWhitespace()
-            .ignoreComments()
-            .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+        assertThat(expectedWhitelist, isSimilarTo(whitelist).ignoreWhitespace().ignoreComments()
+                .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
 
     }
 
