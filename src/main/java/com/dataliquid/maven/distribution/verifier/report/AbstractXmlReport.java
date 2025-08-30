@@ -15,7 +15,9 @@
  */
 package com.dataliquid.maven.distribution.verifier.report;
 
-import java.io.FileWriter;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
@@ -26,11 +28,13 @@ public abstract class AbstractXmlReport implements Report
 
     protected void writeFile(String reportFileName, Document document) throws Exception
     {
-        try (FileWriter writer = new FileWriter(reportFileName))
+        try (Writer writer = Files.newBufferedWriter(Paths.get(reportFileName)))
         {
             OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter xmlWriter = new XMLWriter(writer, format);
-            xmlWriter.write(document);
+            try (XMLWriter xmlWriter = new XMLWriter(writer, format))
+            {
+                xmlWriter.write(document);
+            }
         }
         catch (Exception e)
         {

@@ -16,8 +16,9 @@
 package com.dataliquid.maven.distribution.verifier.service;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -55,27 +56,47 @@ public class VerifierService
         {
             File destinationDirectory = determineDestinationDirectory(distributionArchiveFile, workDirectory);
 
-            logger.info("Unzip distribution archive file " + distributionArchiveFile.getPath() + " to " + destinationDirectory);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Unzip distribution archive file " + distributionArchiveFile.getPath() + " to " + destinationDirectory);
+            }
 
             ZipUtil.unpack(distributionArchiveFile, destinationDirectory);
 
-            logger.info("File unzipped successfully");
+            if (logger.isInfoEnabled())
+            {
+                logger.info("File unzipped successfully");
+            }
 
-            logger.info("Loading whitelist " + whitelist);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Loading whitelist " + whitelist);
+            }
             List<Entry> entries = loadWhitelist(whitelist, properties);
-            logger.info("Whitelist file loaded successfully - Entries: " + entries.size());
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Whitelist file loaded successfully - Entries: " + entries.size());
+            }
 
-            logger.info("Verifying whitelist files against distribution archive");
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Verifying whitelist files against distribution archive");
+            }
 
             verificationStatus = verifyDistributionArchive(destinationDirectory, entries, destinationDirectory, verificationResults);
 
-            logger.info("Verification completed.");
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Verification completed.");
+            }
 
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            logger.error("Error occurred : {}", e.getMessage(), e);
+            if (logger.isErrorEnabled())
+            {
+                logger.error("Error occurred : {}", e.getMessage(), e);
+            }
         }
 
         return new VerifierResult(verificationStatus, verificationResults);
@@ -84,7 +105,7 @@ public class VerifierService
 
     private File determineDestinationDirectory(File distributionArchiveFile, File workDirectory)
     {
-        File destinationDirectory = null;
+        File destinationDirectory;
         if (workDirectory != null)
         {
             String distributionWorkDirectory = distributionArchiveFile.getName().concat("-unzipped");
@@ -98,6 +119,7 @@ public class VerifierService
         return destinationDirectory;
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory,
             List<ResultEntry> verificationResults) throws Exception
     {
@@ -110,17 +132,23 @@ public class VerifierService
             resultEntry.setPath(entry.getPath());
             resultEntry.setMd5(entry.getMd5());
 
-            File currentFile = new File(directory.getPath().concat(entry.getPath()));
+            File currentFile = new File(directory, entry.getPath());
             if (currentFile.exists())
             {
-                logger.debug("Defined entry found " + entry.getPath());
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Defined entry found " + entry.getPath());
+                }
 
                 if (entry.getMd5() != null && !entry.getMd5().isEmpty())
                 {
                     String fileMd5Checksum = getFileChecksum(currentFile);
                     if (fileMd5Checksum.equals(entry.getMd5()))
                     {
-                        logger.debug("MD5 Checksum of file " + currentFile.getPath() + " is identical to " + entry.getPath());
+                        if (logger.isDebugEnabled())
+                        {
+                            logger.debug("MD5 Checksum of file " + currentFile.getPath() + " is identical to " + entry.getPath());
+                        }
                         resultEntry.setStatus(VerificationStatus.SUCCESS.name());
                         resultEntry.setMessage("Validation passed successfully");
                     }
@@ -128,7 +156,10 @@ public class VerifierService
                     {
                         verificationStatus = false;
 
-                        logger.debug("MD5 checksum of file " + currentFile.getPath() + " is different to " + entry.getPath());
+                        if (logger.isDebugEnabled())
+                        {
+                            logger.debug("MD5 checksum of file " + currentFile.getPath() + " is different to " + entry.getPath());
+                        }
                         resultEntry.setStatus(VerificationStatus.FAILED.name());
                         resultEntry.setMessage("File found but with a different MD5 Checksum " + fileMd5Checksum);
                     }
@@ -143,7 +174,10 @@ public class VerifierService
             {
                 verificationStatus = false;
 
-                logger.debug("Defined file is not found " + entry.getPath() + EMPTY);
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("Defined file is not found " + entry.getPath());
+                }
 
                 resultEntry.setStatus(VerificationStatus.FAILED.name());
                 resultEntry.setMessage("Defined file not found");
@@ -209,12 +243,13 @@ public class VerifierService
         return exists;
     }
 
+    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public List<Entry> loadWhitelist(File whitelist, Map<String, String> properties) throws Exception
     {
         SAXReader reader = new SAXReader();
         Document document = reader.read(whitelist);
 
-        List<Entry> entries = new ArrayList<Entry>();
+        List<Entry> entries = new ArrayList<>();
         List<Node> nodes = document.selectNodes("//whitelist/entry");
         for (Node node : nodes)
         {
@@ -227,7 +262,10 @@ public class VerifierService
                 entry.setMd5(element.attributeValue("md5"));
                 evaluate(entry, properties);
                 entries.add(entry);
-                logger.debug("<entry path=\"" + entry.getPath() + "\" md5=\"" + entry.getMd5() + "\"");
+                if (logger.isDebugEnabled())
+                {
+                    logger.debug("<entry path=\"" + entry.getPath() + "\" md5=\"" + entry.getMd5() + "\"");
+                }
             }
         }
 
@@ -261,7 +299,10 @@ public class VerifierService
             }
             else
             {
-                logger.warn("Variable '" + matcher.group(1) + "' is defined but could not resolved by the given variables.");
+                if (logger.isWarnEnabled())
+                {
+                    logger.warn("Variable '" + matcher.group(1) + "' is defined but could not resolved by the given variables.");
+                }
             }
         }
         matcher.appendTail(buffer);
@@ -270,7 +311,10 @@ public class VerifierService
 
     private String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException
     {
-        return DigestUtils.md5Hex(new FileInputStream(file));
+        try (InputStream is = Files.newInputStream(file.toPath()))
+        {
+            return DigestUtils.md5Hex(is);
+        }
     }
 
 }

@@ -16,9 +16,10 @@
 package com.dataliquid.maven.distribution.verifier.service;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -43,7 +44,7 @@ public class GenerateService
 
         try
         {
-            File destinationDirectory = null;
+            File destinationDirectory;
             if (workDirectory != null)
             {
                 String distributionWorkDirectory = distributionArchiveFile.getName().concat("-unzipped");
@@ -55,23 +56,37 @@ public class GenerateService
                 destinationDirectory = new File(distributionArchiveFile.getParentFile(), name);
             }
 
-            logger.info("Unzip distribution archive file " + distributionArchiveFile.getPath() + " to " + destinationDirectory);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Unzip distribution archive file " + distributionArchiveFile.getPath() + " to " + destinationDirectory);
+            }
 
             ZipUtil.unpack(distributionArchiveFile, destinationDirectory);
 
-            logger.info("File unzipped successfully");
+            if (logger.isInfoEnabled())
+            {
+                logger.info("File unzipped successfully");
+            }
 
-            logger.info("Generate whitelist template from distribution archive");
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Generate whitelist template from distribution archive");
+            }
 
             generateWhitelist(destinationDirectory, destinationDirectory, whitelist);
 
-            logger.info("Whitelist template has been generated. " + whitelist);
+            if (logger.isInfoEnabled())
+            {
+                logger.info("Whitelist template has been generated. " + whitelist);
+            }
 
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            logger.error("Error occurred : {}", e.getMessage(), e);
+            if (logger.isErrorEnabled())
+            {
+                logger.error("Error occurred : {}", e.getMessage(), e);
+            }
         }
 
     }
@@ -86,11 +101,13 @@ public class GenerateService
 
         FileUtils.forceMkdir(new File(whistlist.getParent()));
 
-        try (FileWriter writer = new FileWriter(whistlist))
+        try (Writer writer = Files.newBufferedWriter(whistlist.toPath()))
         {
             OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter xmlWriter = new XMLWriter(writer, format);
-            xmlWriter.write(document);
+            try (XMLWriter xmlWriter = new XMLWriter(writer, format))
+            {
+                xmlWriter.write(document);
+            }
         }
         catch (Exception e)
         {
@@ -131,7 +148,10 @@ public class GenerateService
 
     private String getFileChecksum(File file) throws IOException, NoSuchAlgorithmException
     {
-        return DigestUtils.md5Hex(new FileInputStream(file));
+        try (InputStream is = Files.newInputStream(file.toPath()))
+        {
+            return DigestUtils.md5Hex(is);
+        }
     }
 
 }

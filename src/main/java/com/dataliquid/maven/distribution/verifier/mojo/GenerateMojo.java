@@ -43,12 +43,19 @@ public class GenerateMojo extends AbstractMojo
     @Parameter(property = "whitelist", defaultValue = "${project.build.directory}/whitelist.tmpl.xml")
     private File whitelist;
 
+    @Override
     public void execute() throws MojoExecutionException
     {
-        getLog().info("Generating whitelist file for distribution archive file " + distributionArchiveFile);
+        if (getLog().isInfoEnabled())
+        {
+            getLog().info("Generating whitelist file for distribution archive file " + distributionArchiveFile);
+        }
         GenerateService verifierPluginService = new GenerateService();
         verifierPluginService.generate(distributionArchiveFile, outputDirectory, whitelist);
-        getLog().info("Whitelist generated.");
+        if (getLog().isInfoEnabled())
+        {
+            getLog().info("Whitelist generated.");
+        }
     }
 
     public MavenProject getProject()
