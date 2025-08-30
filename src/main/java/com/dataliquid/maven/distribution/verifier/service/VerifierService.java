@@ -119,78 +119,106 @@ public class VerifierService
         return destinationDirectory;
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     private boolean verifyDistributionArchive(File directory, List<Entry> entries, File originalDirectory,
             List<ResultEntry> verificationResults) throws Exception
     {
-        boolean verificationStatus = true;
+        boolean allEntriesValid = verifyAllEntries(directory, entries, verificationResults);
+        boolean allFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory, verificationResults);
 
+        return allEntriesValid && allFilesInWhitelist;
+    }
+
+    private boolean verifyAllEntries(File directory, List<Entry> entries, List<ResultEntry> verificationResults) throws Exception
+    {
+        boolean allValid = true;
         for (Entry entry : entries)
         {
-            ResultEntry resultEntry = new ResultEntry();
-            verificationResults.add(resultEntry);
-            resultEntry.setPath(entry.getPath());
-            resultEntry.setMd5(entry.getMd5());
-
-            File currentFile = new File(directory, entry.getPath());
-            if (currentFile.exists())
-            {
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Defined entry found " + entry.getPath());
-                }
-
-                if (entry.getMd5() != null && !entry.getMd5().isEmpty())
-                {
-                    String fileMd5Checksum = getFileChecksum(currentFile);
-                    if (fileMd5Checksum.equals(entry.getMd5()))
-                    {
-                        if (logger.isDebugEnabled())
-                        {
-                            logger.debug("MD5 Checksum of file " + currentFile.getPath() + " is identical to " + entry.getPath());
-                        }
-                        resultEntry.setStatus(VerificationStatus.SUCCESS.name());
-                        resultEntry.setMessage("Validation passed successfully");
-                    }
-                    else
-                    {
-                        verificationStatus = false;
-
-                        if (logger.isDebugEnabled())
-                        {
-                            logger.debug("MD5 checksum of file " + currentFile.getPath() + " is different to " + entry.getPath());
-                        }
-                        resultEntry.setStatus(VerificationStatus.FAILED.name());
-                        resultEntry.setMessage("File found but with a different MD5 Checksum " + fileMd5Checksum);
-                    }
-                }
-                else
-                {
-                    resultEntry.setStatus(VerificationStatus.SUCCESS.name());
-                    resultEntry.setMessage("Validation passed successfully");
-                }
-            }
-            else
-            {
-                verificationStatus = false;
-
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("Defined file is not found " + entry.getPath());
-                }
-
-                resultEntry.setStatus(VerificationStatus.FAILED.name());
-                resultEntry.setMessage("Defined file not found");
-            }
-
+            boolean isValid = verifySingleEntry(directory, entry, verificationResults);
+            allValid = allValid && isValid;
         }
+        return allValid;
+    }
 
-        boolean verifyAllFilesInWhitelist = verifyAllFilesInWhitelist(directory, entries, originalDirectory, verificationResults);
-        if (!verifyAllFilesInWhitelist)
+    private boolean verifySingleEntry(File directory, Entry entry, List<ResultEntry> verificationResults) throws Exception
+    {
+        ResultEntry resultEntry = createResultEntry(entry);
+        verificationResults.add(resultEntry);
+
+        File currentFile = new File(directory, entry.getPath());
+
+        if (!currentFile.exists())
         {
-            verificationStatus = false;
+            return handleMissingFile(resultEntry, entry);
         }
-        return verificationStatus;
+
+        logDebug("Defined entry found " + entry.getPath());
+
+        if (shouldVerifyChecksum(entry))
+        {
+            return verifyChecksum(currentFile, entry, resultEntry);
+        }
+
+        markAsSuccessful(resultEntry);
+        return true;
+    }
+
+    private ResultEntry createResultEntry(Entry entry)
+    {
+        ResultEntry resultEntry = new ResultEntry();
+        resultEntry.setPath(entry.getPath());
+        resultEntry.setMd5(entry.getMd5());
+        return resultEntry;
+    }
+
+    private boolean handleMissingFile(ResultEntry resultEntry, Entry entry)
+    {
+        logDebug("Defined file is not found " + entry.getPath());
+        markAsFailed(resultEntry, "Defined file not found");
+        return false;
+    }
+
+    private boolean shouldVerifyChecksum(Entry entry)
+    {
+        return entry.getMd5() != null && !entry.getMd5().isEmpty();
+    }
+
+    private boolean verifyChecksum(File file, Entry entry, ResultEntry resultEntry) throws Exception
+    {
+        String actualChecksum = getFileChecksum(file);
+        String expectedChecksum = entry.getMd5();
+
+        if (actualChecksum.equals(expectedChecksum))
+        {
+            logDebug("MD5 Checksum of file " + file.getPath() + " is identical to " + entry.getPath());
+            markAsSuccessful(resultEntry);
+            return true;
+        }
+        else
+        {
+            logDebug("MD5 checksum of file " + file.getPath() + " is different to " + entry.getPath());
+            markAsFailed(resultEntry, "File found but with a different MD5 Checksum " + actualChecksum);
+            return false;
+        }
+    }
+
+    private void markAsSuccessful(ResultEntry resultEntry)
+    {
+        resultEntry.setStatus(VerificationStatus.SUCCESS.name());
+        resultEntry.setMessage("Validation passed successfully");
+    }
+
+    private void markAsFailed(ResultEntry resultEntry, String message)
+    {
+        resultEntry.setStatus(VerificationStatus.FAILED.name());
+        resultEntry.setMessage(message);
+    }
+
+    private void logDebug(String message)
+    {
+        if (logger.isDebugEnabled())
+        {
+            logger.debug(message);
+        }
     }
 
     private boolean verifyAllFilesInWhitelist(File directory, List<Entry> whitelistEntries, File originalDirectory,
