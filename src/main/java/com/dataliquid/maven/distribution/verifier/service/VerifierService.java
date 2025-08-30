@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.stream.Collectors;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -271,33 +272,20 @@ public class VerifierService
         return exists;
     }
 
-    @SuppressWarnings("PMD.AvoidInstantiatingObjectsInLoops")
     public List<Entry> loadWhitelist(File whitelist, Map<String, String> properties) throws Exception
     {
         SAXReader reader = new SAXReader();
         Document document = reader.read(whitelist);
 
-        List<Entry> entries = new ArrayList<>();
-        List<Node> nodes = document.selectNodes("//whitelist/entry");
-        for (Node node : nodes)
-        {
-            if (node.getNodeType() == Node.ELEMENT_NODE)
-            {
-                Element element = (Element) node;
-
-                Entry entry = new Entry();
-                entry.setPath(element.attributeValue("path"));
-                entry.setMd5(element.attributeValue("md5"));
-                evaluate(entry, properties);
-                entries.add(entry);
-                if (logger.isDebugEnabled())
-                {
-                    logger.debug("<entry path=\"" + entry.getPath() + "\" md5=\"" + entry.getMd5() + "\"");
-                }
-            }
-        }
-
-        return entries;
+        return document.selectNodes("//whitelist/entry").stream().filter(node -> node.getNodeType() == Node.ELEMENT_NODE).map(node -> {
+            Element element = (Element) node;
+            Entry entry = new Entry();
+            entry.setPath(element.attributeValue("path"));
+            entry.setMd5(element.attributeValue("md5"));
+            evaluate(entry, properties);
+            logDebug("<entry path=\"" + entry.getPath() + "\" md5=\"" + entry.getMd5() + "\"");
+            return entry;
+        }).collect(Collectors.toList());
     }
 
     private void evaluate(Entry entry, Map<String, String> properties)
