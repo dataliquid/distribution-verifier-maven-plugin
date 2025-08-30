@@ -18,6 +18,7 @@ package com.dataliquid.maven.distribution.verifier.mojo;
 import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.maven.plugin.AbstractMojo;
@@ -73,16 +74,23 @@ public class VerifyMojo extends AbstractMojo
     @Parameter(property = "properties")
     private Map<String, String> properties;
 
+    @Override
     public void execute() throws MojoExecutionException
     {
         initialize();
-        getLog().info("Verifying the distribution archive file " + distributionArchiveFile);
+        if (getLog().isInfoEnabled())
+        {
+            getLog().info("Verifying the distribution archive file " + distributionArchiveFile);
+        }
         VerifierService verifierPluginService = new VerifierService();
         VerifierResult verifierResult = verifierPluginService.verify(distributionArchiveFile, outputDirectory, whitelist, properties);
         generateReport(verifierResult.getResultEntries(), reportFile);
         if (verifierResult.isValid())
         {
-            getLog().info("Verification finished successfully.");
+            if (getLog().isInfoEnabled())
+            {
+                getLog().info("Verification finished successfully.");
+            }
         }
         else
         {
@@ -99,8 +107,10 @@ public class VerifyMojo extends AbstractMojo
         }
         catch (Exception e)
         {
-            e.printStackTrace();
-            getLog().error("Error occurred while creating the repot file:" + e.getMessage());
+            if (getLog().isErrorEnabled())
+            {
+                getLog().error("Error occurred while creating the repot file:" + e.getMessage(), e);
+            }
             throw new MojoExecutionException("Report generation failed!", e);
         }
 
@@ -108,12 +118,16 @@ public class VerifyMojo extends AbstractMojo
 
     private Report createReport() throws MojoExecutionException
     {
-        Report report = null;
-        if (reportType.toLowerCase().trim().equals("xml"))
+        final String XML_TYPE = "xml";
+        final String JUNIT_TYPE = "junit";
+
+        Report report;
+        String normalizedReportType = reportType.toLowerCase(Locale.ROOT).trim();
+        if (XML_TYPE.equals(normalizedReportType))
         {
             report = new XmlReport();
         }
-        else if (reportType.toLowerCase().trim().equals("junit"))
+        else if (JUNIT_TYPE.equals(normalizedReportType))
         {
             report = new JUnitReport();
         }

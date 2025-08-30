@@ -34,7 +34,10 @@ public class JUnitReport extends AbstractXmlReport
     @Override
     public void generateReport(List<ResultEntry> results, String reportFileName) throws Exception
     {
-        logger.info("start generating junit report");
+        if (logger.isInfoEnabled())
+        {
+            logger.info("start generating junit report");
+        }
         Document document = DocumentHelper.createDocument();
         final Element testsuite = registerTestSuiteInDocument(results, document);
 
@@ -54,7 +57,10 @@ public class JUnitReport extends AbstractXmlReport
         }
 
         writeFile(reportFileName, document);
-        logger.info("report has been written to:" + reportFileName);
+        if (logger.isInfoEnabled())
+        {
+            logger.info("report has been written to:" + reportFileName);
+        }
     }
 
     private Element registerTestSuiteInDocument(List<ResultEntry> results, Document document)

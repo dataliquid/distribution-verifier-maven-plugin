@@ -33,13 +33,19 @@ public class XmlReport extends AbstractXmlReport
     @Override
     public void generateReport(List<ResultEntry> results, String reportFileName) throws Exception
     {
-        logger.info("start generating xml report");
+        if (logger.isInfoEnabled())
+        {
+            logger.info("start generating xml report");
+        }
 
         Document document = DocumentHelper.createDocument();
         Element report = document.addElement("report");
         for (ResultEntry resultEntry : results)
         {
-            logger.debug("start processing resultEntry:" + resultEntry.toString());
+            if (logger.isDebugEnabled())
+            {
+                logger.debug("start processing resultEntry:" + resultEntry.toString());
+            }
             Element reportEntry = report.addElement("entry");
             reportEntry.addAttribute("path", resultEntry.getPath());
             reportEntry.addAttribute("md5", resultEntry.getMd5());
@@ -49,7 +55,10 @@ public class XmlReport extends AbstractXmlReport
         }
 
         writeFile(reportFileName, document);
-        logger.info("report has been written to:" + reportFileName);
+        if (logger.isInfoEnabled())
+        {
+            logger.info("report has been written to:" + reportFileName);
+        }
     }
 
 }
