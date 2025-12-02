@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.dataliquid.maven.distribution.verifier.domain.ResultEntry;
 
+@FunctionalInterface
 public interface Report
 {
     void generateReport(List<ResultEntry> results, String reportFileName) throws Exception;
